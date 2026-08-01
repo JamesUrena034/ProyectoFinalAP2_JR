@@ -12,6 +12,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import edu.ucne.proyectofinalap2_jr.data.repository.AuthRepositoryImpl
 import edu.ucne.proyectofinalap2_jr.domain.repository.AuthRepository
+import com.google.firebase.firestore.FirebaseFirestore
 import javax.inject.Singleton
 
 @Module
@@ -24,13 +25,19 @@ object AuthModule {
 
     @Provides
     @Singleton
-    fun provideCredentialManager(@ApplicationContext context: Context): CredentialManager =
-        CredentialManager.create(context)
+    fun provideFirebaseFirestore(): FirebaseFirestore = FirebaseFirestore.getInstance()
+
+    @Provides
+    @Singleton
+    fun provideCredentialManager(
+        @ApplicationContext context: Context
+    ): CredentialManager = CredentialManager.create(context)
 
     @Provides
     @Singleton
     fun provideAuthRepository(
         auth: FirebaseAuth,
+        firestore: FirebaseFirestore,
         credentialManager: CredentialManager
-    ): AuthRepository = AuthRepositoryImpl(auth, credentialManager)
+    ): AuthRepository = AuthRepositoryImpl(auth, firestore, credentialManager)
 }
