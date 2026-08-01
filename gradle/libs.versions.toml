@@ -14,27 +14,20 @@ kotlin = "2.3.21"
 ksp = "2.3.7"
 hilt = "2.59.2"
 composeBom = "2026.04.01"
-room = "2.8.4"
 navigationCompose = "2.9.8"
 kotlinSerializationJson = "1.11.0"
-retrofit2KotlinxSerializationConverter = "1.0.0"
-retrofit = "3.0.0"
-roomCompiler = "2.8.4"
-roomKtx = "2.8.4"
-roomRuntime = "2.8.4"
 credentials = "1.6.0"
 firebaseBom = "34.16.0"
 googleid = "1.2.0"
 kotlinxCoroutinesPlayServices = "1.11.0"
+coil = "2.7.0"
+mockk = "1.13.8"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycleRuntimeKtx" }
 androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycleRuntimeKtx" }
-androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomCompiler" }
-androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomKtx" }
-androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroidCompiler" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroidCompiler" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -55,14 +48,15 @@ androidx-navigation-compose = { module = "androidx.navigation:navigation-compose
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutinesCore" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinSerializationJson" }
-retrofit2-kotlinx-serialization-converter = { module = "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter", version.ref = "retrofit2KotlinxSerializationConverter" }
-retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 androidx-credentials = { module = "androidx.credentials:credentials", version.ref = "credentials" }
 androidx-credentials-play-services-auth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentials" }
 firebase-auth = { module = "com.google.firebase:firebase-auth" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+firebase-firestore = { module = "com.google.firebase:firebase-firestore" }
 googleid = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "googleid" }
 kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "kotlinxCoroutinesPlayServices" }
+coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -70,4 +64,4 @@ kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "ko
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 devtools-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
-room-android = { id = "androidx.room", version.ref = "room" }
+google-services = { id = "com.google.gms.google-services", version = "4.4.2" }

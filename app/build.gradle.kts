@@ -4,15 +4,12 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.devtools.ksp)
     alias(libs.plugins.hilt.android)
-    alias(libs.plugins.room.android)
-    id("com.google.gms.google-services")
+    alias(libs.plugins.google.services)
 }
 
 android {
     namespace = "edu.ucne.proyectofinalap2_jr"
-    compileSdk {
-        version = release(37)
-    }
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "edu.ucne.proyectofinalap2_jr"
@@ -20,15 +17,16 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
         release {
-            optimization {
-                enable = false
-            }
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
     compileOptions {
@@ -43,10 +41,6 @@ android {
     }
 }
 
-room {
-    schemaDirectory("$projectDir/schemas")
-}
-
 dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
@@ -57,10 +51,6 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
-    // Room
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
-    ksp(libs.androidx.room.compiler)
 
     // Hilt
     implementation(libs.hilt.android)
@@ -74,42 +64,40 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.lifecycle.runtime.compose)
 
-    // Navigation Compose (needed for our NavHost)
+    // Navigation
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.hilt.navigation.compose)
 
-    // Serialization (needed for navigation screens)
+    // Serialization
     implementation(libs.kotlinx.serialization.json)
 
-    testImplementation(libs.junit)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(libs.androidx.junit)
-    debugImplementation(libs.androidx.compose.ui.test.manifest)
-    debugImplementation(libs.androidx.compose.ui.tooling)
+    // Coil
+    implementation(libs.coil.compose)
 
-    // Unit Testing
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
-    testImplementation("io.mockk:mockk:1.13.8")
-    testImplementation("androidx.arch.core:core-testing:2.2.0")
-
-    // Hilt Testing
-    testImplementation("com.google.dagger:hilt-android-testing:2.59")
-    kspTest(libs.hilt.android.compiler)
-    androidTestImplementation("com.google.dagger:hilt-android-testing:2.59")
-    kspAndroidTest(libs.hilt.android.compiler)
-
-    // Room Testing
-    testImplementation("androidx.room:room-testing:2.8.4")
-
-    //Firebase
+    // Firebase
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
     implementation(libs.kotlinx.coroutines.play.services)
 
     // Credential Manager
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.googleid)
+
+    // Testing
+    testImplementation(libs.junit)
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    testImplementation(libs.mockk)
+    testImplementation("androidx.arch.core:core-testing:2.2.0")
+    testImplementation("com.google.dagger:hilt-android-testing:2.59.2")
+    kspTest(libs.hilt.android.compiler)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation("com.google.dagger:hilt-android-testing:2.59.2")
+    kspAndroidTest(libs.hilt.android.compiler)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
+    debugImplementation(libs.androidx.compose.ui.tooling)
 }
