@@ -21,12 +21,16 @@ class AuthRepositoryImpl @Inject constructor(
     private val credentialManager: CredentialManager
 ) : AuthRepository {
 
+    companion object {
+        private val ADMIN_EMAILS = listOf("victormarino1962@gmail.com")
+    }
+
     override suspend fun signInWithGoogle(context: Context): Result<FirebaseUser> {
         return try {
             val googleIdOption = GetGoogleIdOption.Builder()
                 .setFilterByAuthorizedAccounts(false)
                 .setServerClientId("803197363275-mcdte695696fqkd2uaa24blt43oq49vc.apps.googleusercontent.com")
-                .setAutoSelectEnabled(true)
+                .setAutoSelectEnabled(false)
                 .build()
 
             val request = GetCredentialRequest.Builder()
@@ -47,12 +51,14 @@ class AuthRepositoryImpl @Inject constructor(
                     auth.signInWithCredential(firebaseAuthCredential).await()
                 val user = authResult.user!!
 
+                val rolFinal = if (user.email in ADMIN_EMAILS) "admin" else "usuario"
+
                 val usuario = Usuario(
                     uid = user.uid,
                     nombre = user.displayName ?: "",
                     email = user.email ?: "",
                     foto = user.photoUrl?.toString() ?: "",
-                    rol = "usuario"
+                    rol = rolFinal
                 )
                 saveUserData(usuario)
                 Result.success(user)
@@ -81,16 +87,10 @@ class AuthRepositoryImpl @Inject constructor(
 
     override suspend fun saveUserData(usuario: Usuario) {
         try {
-            val doc = firestore.collection("usuarios").document(usuario.uid).get().await()
-            if (!doc.exists()) {
-                val rolFinal = if (
-                    usuario.email == "ronneld034@gmail.com"
-                ) "admin" else "usuario"
-                firestore.collection("usuarios")
-                    .document(usuario.uid)
-                    .set(usuario.copy(rol = rolFinal))
-                    .await()
-            }
+            firestore.collection("usuarios")
+                .document(usuario.uid)
+                .set(usuario)
+                .await()
         } catch (e: Exception) {
             e.printStackTrace()
         }
