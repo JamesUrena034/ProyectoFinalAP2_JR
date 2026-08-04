@@ -83,9 +83,12 @@ class AuthRepositoryImpl @Inject constructor(
         try {
             val doc = firestore.collection("usuarios").document(usuario.uid).get().await()
             if (!doc.exists()) {
+                val rolFinal = if (
+                    usuario.email == "ronneld034@gmail.com"
+                ) "admin" else "usuario"
                 firestore.collection("usuarios")
                     .document(usuario.uid)
-                    .set(usuario)
+                    .set(usuario.copy(rol = rolFinal))
                     .await()
             }
         } catch (e: Exception) {
