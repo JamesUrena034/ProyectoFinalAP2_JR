@@ -9,12 +9,12 @@ plugins {
 
 android {
     namespace = "edu.ucne.proyectofinalap2_jr"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "edu.ucne.proyectofinalap2_jr"
         minSdk = 26
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
