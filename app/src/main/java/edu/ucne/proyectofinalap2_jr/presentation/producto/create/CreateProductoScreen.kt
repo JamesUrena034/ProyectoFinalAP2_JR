@@ -1,15 +1,11 @@
 package edu.ucne.proyectofinalap2_jr.presentation.producto.create
 
-import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Image
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -32,12 +28,6 @@ fun CreateProductoScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    val imagePicker = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        viewModel.onImagenUriChange(uri)
-    }
-
     LaunchedEffect(productoId) {
         viewModel.load(productoId)
     }
@@ -52,8 +42,8 @@ fun CreateProductoScreen(
         onNombreChange = viewModel::onNombreChange,
         onDescripcionChange = viewModel::onDescripcionChange,
         onPrecioChange = viewModel::onPrecioChange,
+        onImagenChange = viewModel::onImagenChange,
         onCategoriaChange = viewModel::onCategoriaChange,
-        onSelectImage = { imagePicker.launch("image/*") },
         onSave = viewModel::save
     )
 }
@@ -66,8 +56,8 @@ fun CreateProductoBodyScreen(
     onNombreChange: (String) -> Unit,
     onDescripcionChange: (String) -> Unit,
     onPrecioChange: (String) -> Unit,
+    onImagenChange: (String) -> Unit,
     onCategoriaChange: (String) -> Unit,
-    onSelectImage: () -> Unit,
     onSave: () -> Unit
 ) {
     Scaffold(
@@ -99,17 +89,7 @@ fun CreateProductoBodyScreen(
                         .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // Imagen
-                    if (state.imagenUri != null) {
-                        AsyncImage(
-                            model = state.imagenUri,
-                            contentDescription = null,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(200.dp),
-                            contentScale = ContentScale.Crop
-                        )
-                    } else if (state.imagen.isNotBlank()) {
+                    if (state.imagen.isNotBlank()) {
                         AsyncImage(
                             model = state.imagen,
                             contentDescription = null,
@@ -118,15 +98,6 @@ fun CreateProductoBodyScreen(
                                 .height(200.dp),
                             contentScale = ContentScale.Crop
                         )
-                    }
-
-                    OutlinedButton(
-                        onClick = onSelectImage,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Icon(Icons.Default.Image, contentDescription = null)
-                        Spacer(Modifier.width(8.dp))
-                        Text("Seleccionar imagen")
                     }
 
                     OutlinedTextField(
@@ -159,6 +130,13 @@ fun CreateProductoBodyScreen(
                     state.precioError?.let {
                         Text(it, color = Color.Red, style = MaterialTheme.typography.bodySmall)
                     }
+
+                    OutlinedTextField(
+                        value = state.imagen,
+                        onValueChange = onImagenChange,
+                        label = { Text("URL de imagen") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
 
                     OutlinedTextField(
                         value = state.categoriaId,
@@ -208,8 +186,8 @@ fun CreateProductoBodyScreenPreview() {
             onNombreChange = {},
             onDescripcionChange = {},
             onPrecioChange = {},
+            onImagenChange = {},
             onCategoriaChange = {},
-            onSelectImage = {},
             onSave = {}
         )
     }
