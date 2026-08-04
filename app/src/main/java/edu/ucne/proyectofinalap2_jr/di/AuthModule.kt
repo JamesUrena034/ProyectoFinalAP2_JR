@@ -5,6 +5,7 @@ import androidx.credentials.CredentialManager
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
+import com.google.firebase.firestore.FirebaseFirestore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -12,7 +13,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import edu.ucne.proyectofinalap2_jr.data.repository.AuthRepositoryImpl
 import edu.ucne.proyectofinalap2_jr.domain.repository.AuthRepository
-import com.google.firebase.firestore.FirebaseFirestore
 import javax.inject.Singleton
 
 @Module
