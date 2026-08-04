@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import edu.ucne.proyectofinalap2_jr.domain.repository.AuthRepository
 import edu.ucne.proyectofinalap2_jr.domain.usecase.auth.GetCurrentUserUseCase
 import edu.ucne.proyectofinalap2_jr.domain.usecase.auth.SignInUseCase
 import edu.ucne.proyectofinalap2_jr.domain.usecase.auth.SignOutUseCase
@@ -18,7 +19,8 @@ import javax.inject.Inject
 class AuthViewModel @Inject constructor(
     private val signInUseCase: SignInUseCase,
     private val signOutUseCase: SignOutUseCase,
-    private val getCurrentUserUseCase: GetCurrentUserUseCase
+    private val getCurrentUserUseCase: GetCurrentUserUseCase,
+    private val authRepository: AuthRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AuthUiState())
@@ -27,8 +29,13 @@ class AuthViewModel @Inject constructor(
     init { checkSession() }
 
     private fun checkSession() {
-        getCurrentUserUseCase()?.let { user ->
-            _state.update { it.copy(user = user) }
+        val user = getCurrentUserUseCase()
+        if (user != null) {
+            _state.update { it.copy(isLoading = true, user = user) }
+            viewModelScope.launch {
+                val userData = authRepository.getUserData(user.uid)
+                _state.update { it.copy(isLoading = false, usuario = userData) }
+            }
         }
     }
 
@@ -45,7 +52,14 @@ class AuthViewModel @Inject constructor(
             val result = signInUseCase(context)
             result.fold(
                 onSuccess = { user ->
-                    _state.update { it.copy(isLoading = false, user = user) }
+                    val userData = authRepository.getUserData(user.uid)
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            user = user,
+                            usuario = userData
+                        )
+                    }
                 },
                 onFailure = { e ->
                     _state.update { it.copy(isLoading = false, errorMessage = e.message) }
@@ -57,7 +71,7 @@ class AuthViewModel @Inject constructor(
     private fun signOut() {
         viewModelScope.launch {
             signOutUseCase()
-            _state.update { it.copy(user = null) }
+            _state.update { AuthUiState() }
         }
     }
 }

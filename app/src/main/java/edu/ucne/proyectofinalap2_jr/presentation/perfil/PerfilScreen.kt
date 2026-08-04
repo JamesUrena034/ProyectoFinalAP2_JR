@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import edu.ucne.proyectofinalap2_jr.domain.model.Usuario
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -61,14 +62,31 @@ fun PerfilBodyScreen(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        AsyncImage(
-                            model = state.usuario.foto,
-                            contentDescription = "Foto de perfil",
-                            modifier = Modifier
-                                .size(100.dp)
-                                .clip(CircleShape),
-                            contentScale = ContentScale.Crop
-                        )
+                        if (state.usuario.foto.isNotBlank()) {
+                            AsyncImage(
+                                model = state.usuario.foto,
+                                contentDescription = "Foto de perfil",
+                                modifier = Modifier
+                                    .size(100.dp)
+                                    .clip(CircleShape),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Surface(
+                                modifier = Modifier.size(100.dp),
+                                shape = CircleShape,
+                                color = MaterialTheme.colorScheme.primary
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Text(
+                                        text = state.usuario.nombre.firstOrNull()?.toString() ?: "U",
+                                        style = MaterialTheme.typography.headlineLarge,
+                                        color = Color.White
+                                    )
+                                }
+                            }
+                        }
+
                         Text(
                             state.usuario.nombre,
                             style = MaterialTheme.typography.headlineSmall,
@@ -79,12 +97,47 @@ fun PerfilBodyScreen(
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color.Gray
                         )
-                        Text(
-                            "Rol: ${state.usuario.rol.uppercase()}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Bold
-                        )
+                        Surface(
+                            color = if (state.usuario.rol == "admin")
+                                MaterialTheme.colorScheme.primaryContainer
+                            else
+                                MaterialTheme.colorScheme.secondaryContainer,
+                            shape = MaterialTheme.shapes.small
+                        ) {
+                            Text(
+                                text = state.usuario.rol.uppercase(),
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.Bold,
+                                color = if (state.usuario.rol == "admin")
+                                    MaterialTheme.colorScheme.onPrimaryContainer
+                                else
+                                    MaterialTheme.colorScheme.onSecondaryContainer
+                            )
+                        }
+
+                        Spacer(Modifier.height(16.dp))
+
+                        Button(
+                            onClick = onSignOut,
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.error
+                            )
+                        ) {
+                            Text("Cerrar Sesión")
+                        }
+                    }
+                }
+                else -> {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text("No se pudo cargar el perfil", color = Color.Gray)
                         Spacer(Modifier.height(16.dp))
                         Button(
                             onClick = onSignOut,
@@ -107,7 +160,15 @@ fun PerfilBodyScreen(
 fun PerfilBodyScreenPreview() {
     MaterialTheme {
         PerfilBodyScreen(
-            state = PerfilUiState(),
+            state = PerfilUiState(
+                usuario = Usuario(
+                    uid = "1",
+                    nombre = "Victor Marino",
+                    email = "victormarino1962@gmail.com",
+                    foto = "",
+                    rol = "admin"
+                )
+            ),
             onSignOut = {}
         )
     }

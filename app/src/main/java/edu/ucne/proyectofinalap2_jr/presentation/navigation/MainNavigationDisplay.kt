@@ -11,12 +11,14 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import edu.ucne.proyectofinalap2_jr.presentation.auth.AuthIntent
 import edu.ucne.proyectofinalap2_jr.presentation.auth.AuthViewModel
 import edu.ucne.proyectofinalap2_jr.presentation.auth.LoginScreen
 import edu.ucne.proyectofinalap2_jr.presentation.carrito.CarritoScreen
 import edu.ucne.proyectofinalap2_jr.presentation.carrito.CarritoViewModel
 import edu.ucne.proyectofinalap2_jr.presentation.categoria.CategoriaListScreen
 import edu.ucne.proyectofinalap2_jr.presentation.categoria.CreateCategoriaScreen
+import edu.ucne.proyectofinalap2_jr.presentation.categoria.EditCategoriaScreen
 import edu.ucne.proyectofinalap2_jr.presentation.home.HomeScreen
 import edu.ucne.proyectofinalap2_jr.presentation.pedido.DetallePedidoScreen
 import edu.ucne.proyectofinalap2_jr.presentation.pedido.MisPedidosScreen
@@ -32,35 +34,45 @@ fun MainNavigationDisplay() {
     val authState by authViewModel.state.collectAsStateWithLifecycle()
     val carritoViewModel: CarritoViewModel = hiltViewModel()
 
-    val isAdmin = authState.user != null &&
-            authState.user!!.email?.contains("admin") == true
-
-    val screensWithBottomBar = listOf(
-        Screen.Home::class,
-        Screen.Categorias::class,
-        Screen.Carrito::class,
-        Screen.MisPedidos::class,
-        Screen.Perfil::class,
-        Screen.AdminPedidos::class
-    )
+    val isAdmin = authState.isAdmin
 
     val currentBackStack by navController.currentBackStackEntryAsState()
-    val currentDestination = currentBackStack?.destination
+    val currentRoute = currentBackStack?.destination?.route ?: ""
 
-    val showBottomBar = screensWithBottomBar.any {
-        currentDestination?.route?.contains(it.simpleName ?: "") == true
+    val screensWithBottomBar = listOf(
+        "Home", "Categorias", "Carrito", "MisPedidos",
+        "Perfil", "AdminPedidos", "AdminProductos"
+    )
+    val showBottomBar = screensWithBottomBar.any { currentRoute.contains(it) }
+
+    val currentScreen = when {
+        currentRoute.contains("Home") -> Screen.Home
+        currentRoute.contains("Categorias") -> Screen.Categorias
+        currentRoute.contains("Carrito") -> Screen.Carrito
+        currentRoute.contains("MisPedidos") -> Screen.MisPedidos
+        currentRoute.contains("AdminPedidos") -> Screen.AdminPedidos
+        currentRoute.contains("AdminProductos") -> Screen.AdminProductos
+        currentRoute.contains("Perfil") -> Screen.Perfil
+        else -> Screen.Home
     }
 
-    val startDestination = if (authState.user != null) Screen.Home else Screen.Login
+    LaunchedEffect(authState.user) {
+        if (authState.user == null) {
+            navController.navigate(Screen.Login) {
+                popUpTo(0) { inclusive = true }
+            }
+        }
+    }
 
     Scaffold(
         bottomBar = {
-            if (showBottomBar) {
+            if (showBottomBar && authState.user != null) {
                 BottomNavBar(
-                    currentScreen = Screen.Home,
+                    currentScreen = currentScreen,
                     onNavClick = { screen ->
                         navController.navigate(screen) {
                             launchSingleTop = true
+                            restoreState = true
                         }
                     },
                     isAdmin = isAdmin
@@ -70,7 +82,7 @@ fun MainNavigationDisplay() {
     ) { padding ->
         NavHost(
             navController = navController,
-            startDestination = startDestination,
+            startDestination = if (authState.user != null) Screen.Home else Screen.Login,
             modifier = Modifier.padding(padding)
         ) {
             composable<Screen.Login> {
@@ -96,7 +108,11 @@ fun MainNavigationDisplay() {
                     onCreateClick = {
                         navController.navigate(Screen.CreateCategoria)
                     },
-                    onCategoriaClick = {},
+                    onCategoriaClick = { id ->
+                        if (isAdmin) {
+                            navController.navigate(Screen.EditCategoria(id))
+                        }
+                    },
                     isAdmin = isAdmin
                 )
             }
@@ -104,6 +120,30 @@ fun MainNavigationDisplay() {
             composable<Screen.CreateCategoria> {
                 CreateCategoriaScreen(
                     onBack = { navController.navigateUp() }
+                )
+            }
+
+            composable<Screen.EditCategoria> {
+                val args = it.toRoute<Screen.EditCategoria>()
+                EditCategoriaScreen(
+                    categoriaId = args.categoriaId,
+                    onBack = { navController.navigateUp() }
+                )
+            }
+
+            composable<Screen.AdminProductos> {
+                ProductoListScreen(
+                    onProductoClick = { id ->
+                        if (isAdmin) {
+                            navController.navigate(Screen.ProductoCreate(id))
+                        } else {
+                            navController.navigate(Screen.ProductoDetail(id))
+                        }
+                    },
+                    onCreateClick = {
+                        navController.navigate(Screen.ProductoCreate())
+                    },
+                    isAdmin = isAdmin
                 )
             }
 
@@ -165,9 +205,7 @@ fun MainNavigationDisplay() {
             composable<Screen.Perfil> {
                 PerfilScreen(
                     onSignOut = {
-                        navController.navigate(Screen.Login) {
-                            popUpTo(0) { inclusive = true }
-                        }
+                        authViewModel.processIntent(AuthIntent.SignOut)
                     }
                 )
             }

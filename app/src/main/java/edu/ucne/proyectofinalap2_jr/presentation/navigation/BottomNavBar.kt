@@ -3,6 +3,7 @@ package edu.ucne.proyectofinalap2_jr.presentation.navigation
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Inventory
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material.icons.filled.ShoppingCart
@@ -25,6 +26,7 @@ fun BottomNavBar(
     val items = if (isAdmin) {
         listOf(
             BottomNavItem("Inicio", Icons.Default.Home, Screen.Home),
+            BottomNavItem("Productos", Icons.Default.Inventory, Screen.AdminProductos),
             BottomNavItem("Categorías", Icons.Default.Category, Screen.Categorias),
             BottomNavItem("Pedidos", Icons.Default.Receipt, Screen.AdminPedidos),
             BottomNavItem("Perfil", Icons.Default.Person, Screen.Perfil)

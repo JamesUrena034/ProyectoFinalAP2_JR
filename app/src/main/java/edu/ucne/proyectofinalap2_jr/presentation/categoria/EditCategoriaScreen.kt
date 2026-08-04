@@ -1,9 +1,6 @@
-package edu.ucne.proyectofinalap2_jr.presentation.producto.create
+package edu.ucne.proyectofinalap2_jr.presentation.categoria
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
@@ -12,7 +9,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -21,51 +17,45 @@ import coil.compose.AsyncImage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateProductoScreen(
-    productoId: String = "",
+fun EditCategoriaScreen(
+    categoriaId: String,
     onBack: () -> Unit,
-    viewModel: CreateProductoViewModel = hiltViewModel()
+    viewModel: EditCategoriaViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    LaunchedEffect(productoId) {
-        viewModel.load(productoId)
+    LaunchedEffect(categoriaId) {
+        viewModel.load(categoriaId)
     }
 
     LaunchedEffect(state.savedSuccessfully) {
         if (state.savedSuccessfully) onBack()
     }
 
-    CreateProductoBodyScreen(
+    EditCategoriaBodyScreen(
         state = state,
         onBack = onBack,
         onNombreChange = viewModel::onNombreChange,
         onDescripcionChange = viewModel::onDescripcionChange,
-        onPrecioChange = viewModel::onPrecioChange,
         onImagenChange = viewModel::onImagenChange,
-        onCategoriaChange = viewModel::onCategoriaChange,
         onSave = viewModel::save
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateProductoBodyScreen(
-    state: CreateProductoUiState,
+fun EditCategoriaBodyScreen(
+    state: EditCategoriaUiState,
     onBack: () -> Unit,
     onNombreChange: (String) -> Unit,
     onDescripcionChange: (String) -> Unit,
-    onPrecioChange: (String) -> Unit,
     onImagenChange: (String) -> Unit,
-    onCategoriaChange: (String) -> Unit,
     onSave: () -> Unit
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {
-                    Text(if (state.productoId.isBlank()) "Nuevo Producto" else "Editar Producto")
-                },
+                title = { Text("Editar Categoría") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Regresar")
@@ -85,8 +75,7 @@ fun CreateProductoBodyScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(16.dp)
-                        .verticalScroll(rememberScrollState()),
+                        .padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     if (state.imagen.isNotBlank()) {
@@ -95,7 +84,7 @@ fun CreateProductoBodyScreen(
                             contentDescription = null,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(200.dp),
+                                .height(180.dp),
                             contentScale = ContentScale.Crop
                         )
                     }
@@ -120,28 +109,9 @@ fun CreateProductoBodyScreen(
                     )
 
                     OutlinedTextField(
-                        value = if (state.precio == 0.0) "" else state.precio.toString(),
-                        onValueChange = onPrecioChange,
-                        label = { Text("Precio") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                        isError = state.precioError != null,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    state.precioError?.let {
-                        Text(it, color = Color.Red, style = MaterialTheme.typography.bodySmall)
-                    }
-
-                    OutlinedTextField(
                         value = state.imagen,
                         onValueChange = onImagenChange,
                         label = { Text("URL de imagen") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    OutlinedTextField(
-                        value = state.categoriaId,
-                        onValueChange = onCategoriaChange,
-                        label = { Text("ID Categoría") },
                         modifier = Modifier.fillMaxWidth()
                     )
 
@@ -167,7 +137,7 @@ fun CreateProductoBodyScreen(
                                 color = Color.White
                             )
                         } else {
-                            Text(if (state.productoId.isBlank()) "Guardar" else "Actualizar")
+                            Text("Actualizar")
                         }
                     }
                 }
@@ -178,16 +148,14 @@ fun CreateProductoBodyScreen(
 
 @Preview(showBackground = true)
 @Composable
-fun CreateProductoBodyScreenPreview() {
+fun EditCategoriaBodyScreenPreview() {
     MaterialTheme {
-        CreateProductoBodyScreen(
-            state = CreateProductoUiState(),
+        EditCategoriaBodyScreen(
+            state = EditCategoriaUiState(),
             onBack = {},
             onNombreChange = {},
             onDescripcionChange = {},
-            onPrecioChange = {},
             onImagenChange = {},
-            onCategoriaChange = {},
             onSave = {}
         )
     }
