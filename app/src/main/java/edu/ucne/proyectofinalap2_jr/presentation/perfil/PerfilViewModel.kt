@@ -35,6 +35,7 @@ class PerfilViewModel @Inject constructor(
     fun signOut() {
         viewModelScope.launch {
             signOutUseCase()
+            _state.update { PerfilUiState() }
         }
     }
 }
