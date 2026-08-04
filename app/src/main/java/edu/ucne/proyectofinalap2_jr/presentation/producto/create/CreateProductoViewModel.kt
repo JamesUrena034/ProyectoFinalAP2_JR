@@ -1,9 +1,7 @@
 package edu.ucne.proyectofinalap2_jr.presentation.producto.create
 
-import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.storage.FirebaseStorage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import edu.ucne.proyectofinalap2_jr.domain.model.Producto
 import edu.ucne.proyectofinalap2_jr.domain.usecase.producto.GetProductoByIdUseCase
@@ -13,8 +11,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
-import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
@@ -69,9 +65,9 @@ class CreateProductoViewModel @Inject constructor(
         }
     }
 
-    fun onCategoriaChange(value: String) = _state.update { it.copy(categoriaId = value) }
+    fun onImagenChange(value: String) = _state.update { it.copy(imagen = value) }
 
-    fun onImagenUriChange(uri: Uri?) = _state.update { it.copy(imagenUri = uri) }
+    fun onCategoriaChange(value: String) = _state.update { it.copy(categoriaId = value) }
 
     fun save() {
         val s = _state.value
@@ -82,22 +78,16 @@ class CreateProductoViewModel @Inject constructor(
             _state.update { it.copy(nombreError = nombreError, precioError = precioError) }
             return
         }
-
         viewModelScope.launch {
             _state.update { it.copy(isSaving = true) }
             try {
-                val imagenUrl = if (s.imagenUri != null) {
-                    uploadImage(s.imagenUri)
-                } else {
-                    s.imagen
-                }
                 saveProductoUseCase(
                     Producto(
                         productoId = s.productoId,
                         nombre = s.nombre,
                         descripcion = s.descripcion,
                         precio = s.precio,
-                        imagen = imagenUrl,
+                        imagen = s.imagen,
                         categoriaId = s.categoriaId,
                         disponible = s.disponible
                     )
@@ -107,12 +97,5 @@ class CreateProductoViewModel @Inject constructor(
                 _state.update { it.copy(isSaving = false, error = e.message) }
             }
         }
-    }
-
-    private suspend fun uploadImage(uri: Uri): String {
-        val storage = FirebaseStorage.getInstance()
-        val ref = storage.reference.child("productos/${UUID.randomUUID()}")
-        ref.putFile(uri).await()
-        return ref.downloadUrl.await().toString()
     }
 }
