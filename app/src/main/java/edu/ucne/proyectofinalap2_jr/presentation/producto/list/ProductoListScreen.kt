@@ -7,7 +7,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -28,7 +27,7 @@ fun ProductoListScreen(
     viewModel: ProductoListViewModel = hiltViewModel(),
     onProductoClick: (String) -> Unit,
     onCreateClick: () -> Unit,
-    onEditClick: (String) -> Unit,
+    onEditClick: (String) -> Unit = {},
     isAdmin: Boolean = false
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -36,7 +35,6 @@ fun ProductoListScreen(
         state = state,
         onProductoClick = onProductoClick,
         onCreateClick = onCreateClick,
-        onEditClick = onEditClick,
         onDeleteClick = viewModel::delete,
         isAdmin = isAdmin
     )
@@ -48,7 +46,6 @@ fun ProductoListBodyScreen(
     state: ProductoListUiState,
     onProductoClick: (String) -> Unit,
     onCreateClick: () -> Unit,
-    onEditClick: (String) -> Unit,
     onDeleteClick: (String) -> Unit,
     isAdmin: Boolean = false
 ) {
@@ -78,6 +75,11 @@ fun ProductoListBodyScreen(
                     color = Color.Red,
                     modifier = Modifier.align(Alignment.Center)
                 )
+                state.productos.isEmpty() -> Text(
+                    "No hay productos",
+                    color = Color.Gray,
+                    modifier = Modifier.align(Alignment.Center)
+                )
                 else -> LazyColumn(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -87,7 +89,6 @@ fun ProductoListBodyScreen(
                             producto = producto,
                             isAdmin = isAdmin,
                             onClick = { onProductoClick(producto.productoId) },
-                            onEdit = { onEditClick(producto.productoId) },
                             onDelete = { onDeleteClick(producto.productoId) }
                         )
                     }
@@ -102,7 +103,6 @@ fun ProductoListItem(
     producto: Producto,
     isAdmin: Boolean,
     onClick: () -> Unit,
-    onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
     ElevatedCard(
@@ -138,9 +138,6 @@ fun ProductoListItem(
                 )
             }
             if (isAdmin) {
-                IconButton(onClick = onEdit) {
-                    Icon(Icons.Default.Edit, contentDescription = "Editar")
-                }
                 IconButton(onClick = onDelete) {
                     Icon(Icons.Default.Delete, contentDescription = "Eliminar", tint = Color.Red)
                 }
@@ -157,7 +154,6 @@ fun ProductoListBodyScreenPreview() {
             state = ProductoListUiState(),
             onProductoClick = {},
             onCreateClick = {},
-            onEditClick = {},
             onDeleteClick = {},
             isAdmin = false
         )
