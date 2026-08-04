@@ -80,8 +80,6 @@ dependencies {
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
     implementation(libs.kotlinx.coroutines.play.services)
-    implementation(libs.firebase.storage)
-    implementation(libs.accompanist.permissions)
 
     // Credential Manager
     implementation(libs.androidx.credentials)
