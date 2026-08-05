@@ -6,7 +6,9 @@ data class Pedido(
     val productos: List<ItemPedido> = emptyList(),
     val total: Double = 0.0,
     val estado: String = "pendiente",
-    val fecha: String = ""
+    val fecha: String = "",
+    val fechaInicio: String = "",
+    val fechaFin: String = ""
 )
 
 data class ItemPedido(
