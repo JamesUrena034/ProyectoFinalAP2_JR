@@ -130,10 +130,17 @@ fun PedidoCard(
             }
             Spacer(Modifier.height(4.dp))
             Text(
-                "Fecha: ${pedido.fecha}",
+                "Creado: ${pedido.fecha}",
                 style = MaterialTheme.typography.bodySmall,
                 color = Color.Gray
             )
+            if (pedido.fechaInicio.isNotBlank()) {
+                Text(
+                    "Desde: ${pedido.fechaInicio} — Hasta: ${pedido.fechaFin}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
             Text(
                 "Productos: ${pedido.productos.size}",
                 style = MaterialTheme.typography.bodySmall
