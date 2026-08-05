@@ -48,7 +48,9 @@ class CreateProductoViewModel @Inject constructor(
         it.copy(nombre = value, nombreError = if (value.isBlank()) "Nombre es requerido" else null)
     }
 
-    fun onDescripcionChange(value: String) = _state.update { it.copy(descripcion = value) }
+    fun onDescripcionChange(value: String) = _state.update {
+        it.copy(descripcion = value, descripcionError = if (value.isBlank()) "Descripción es requerida" else null)
+    }
 
     fun onPrecioChange(value: String) {
         val d = value.toDoubleOrNull()
@@ -65,17 +67,33 @@ class CreateProductoViewModel @Inject constructor(
         }
     }
 
-    fun onImagenChange(value: String) = _state.update { it.copy(imagen = value) }
+    fun onImagenChange(value: String) = _state.update {
+        it.copy(imagen = value, imagenError = if (value.isBlank()) "URL de imagen es requerida" else null)
+    }
 
-    fun onCategoriaChange(value: String) = _state.update { it.copy(categoriaId = value) }
+    fun onCategoriaChange(value: String) = _state.update {
+        it.copy(categoriaId = value, categoriaError = if (value.isBlank()) "Categoría es requerida" else null)
+    }
 
     fun save() {
         val s = _state.value
         val nombreError = if (s.nombre.isBlank()) "Nombre es requerido" else null
+        val descripcionError = if (s.descripcion.isBlank()) "Descripción es requerida" else null
         val precioError = if (s.precio <= 0) "El precio debe ser mayor a 0" else null
+        val imagenError = if (s.imagen.isBlank()) "URL de imagen es requerida" else null
+        val categoriaError = if (s.categoriaId.isBlank()) "Categoría es requerida" else null
 
-        if (nombreError != null || precioError != null) {
-            _state.update { it.copy(nombreError = nombreError, precioError = precioError) }
+        if (nombreError != null || descripcionError != null || precioError != null ||
+            imagenError != null || categoriaError != null) {
+            _state.update {
+                it.copy(
+                    nombreError = nombreError,
+                    descripcionError = descripcionError,
+                    precioError = precioError,
+                    imagenError = imagenError,
+                    categoriaError = categoriaError
+                )
+            }
             return
         }
         viewModelScope.launch {
