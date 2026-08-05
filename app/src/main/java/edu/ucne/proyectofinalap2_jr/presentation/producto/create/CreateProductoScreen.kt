@@ -115,9 +115,13 @@ fun CreateProductoBodyScreen(
                         value = state.descripcion,
                         onValueChange = onDescripcionChange,
                         label = { Text("Descripción") },
+                        isError = state.descripcionError != null,
                         modifier = Modifier.fillMaxWidth(),
                         minLines = 3
                     )
+                    state.descripcionError?.let {
+                        Text(it, color = Color.Red, style = MaterialTheme.typography.bodySmall)
+                    }
 
                     OutlinedTextField(
                         value = if (state.precio == 0.0) "" else state.precio.toString(),
@@ -135,15 +139,23 @@ fun CreateProductoBodyScreen(
                         value = state.imagen,
                         onValueChange = onImagenChange,
                         label = { Text("URL de imagen") },
+                        isError = state.imagenError != null,
                         modifier = Modifier.fillMaxWidth()
                     )
+                    state.imagenError?.let {
+                        Text(it, color = Color.Red, style = MaterialTheme.typography.bodySmall)
+                    }
 
                     OutlinedTextField(
                         value = state.categoriaId,
                         onValueChange = onCategoriaChange,
                         label = { Text("ID Categoría") },
+                        isError = state.categoriaError != null,
                         modifier = Modifier.fillMaxWidth()
                     )
+                    state.categoriaError?.let {
+                        Text(it, color = Color.Red, style = MaterialTheme.typography.bodySmall)
+                    }
 
                     if (state.error != null) {
                         Text(
