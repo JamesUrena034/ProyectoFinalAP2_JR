@@ -32,6 +32,8 @@ fun CarritoScreen(
     CarritoBodyScreen(
         state = state,
         onEliminarItem = viewModel::eliminarItem,
+        onFechaInicioChange = viewModel::onFechaInicioChange,
+        onFechaFinChange = viewModel::onFechaFinChange,
         onRealizarPedido = viewModel::realizarPedido
     )
 }
@@ -41,6 +43,8 @@ fun CarritoScreen(
 fun CarritoBodyScreen(
     state: CarritoUiState,
     onEliminarItem: (String) -> Unit,
+    onFechaInicioChange: (String) -> Unit,
+    onFechaFinChange: (String) -> Unit,
     onRealizarPedido: () -> Unit
 ) {
     Scaffold(
@@ -75,8 +79,37 @@ fun CarritoBodyScreen(
                             )
                         }
                     }
+
                     HorizontalDivider()
+
                     Column(modifier = Modifier.padding(16.dp)) {
+
+                        OutlinedTextField(
+                            value = state.fechaInicio,
+                            onValueChange = onFechaInicioChange,
+                            label = { Text("Fecha de inicio (dd/MM/yyyy)") },
+                            isError = state.fechaInicioError != null,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        state.fechaInicioError?.let {
+                            Text(it, color = Color.Red, style = MaterialTheme.typography.bodySmall)
+                        }
+
+                        Spacer(Modifier.height(8.dp))
+
+                        OutlinedTextField(
+                            value = state.fechaFin,
+                            onValueChange = onFechaFinChange,
+                            label = { Text("Fecha de fin (dd/MM/yyyy)") },
+                            isError = state.fechaFinError != null,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        state.fechaFinError?.let {
+                            Text(it, color = Color.Red, style = MaterialTheme.typography.bodySmall)
+                        }
+
+                        Spacer(Modifier.height(8.dp))
+
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
@@ -88,7 +121,18 @@ fun CarritoBodyScreen(
                                 color = MaterialTheme.colorScheme.primary
                             )
                         }
+
+                        if (state.error != null) {
+                            Spacer(Modifier.height(8.dp))
+                            Text(
+                                state.error,
+                                color = Color.Red,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+
                         Spacer(Modifier.height(8.dp))
+
                         Button(
                             onClick = onRealizarPedido,
                             modifier = Modifier.fillMaxWidth()
@@ -140,6 +184,8 @@ fun CarritoBodyScreenPreview() {
         CarritoBodyScreen(
             state = CarritoUiState(),
             onEliminarItem = {},
+            onFechaInicioChange = {},
+            onFechaFinChange = {},
             onRealizarPedido = {}
         )
     }

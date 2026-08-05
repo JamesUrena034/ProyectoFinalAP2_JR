@@ -13,5 +13,8 @@ data class CreateProductoUiState(
     val savedSuccessfully: Boolean = false,
     val error: String? = null,
     val nombreError: String? = null,
-    val precioError: String? = null
+    val descripcionError: String? = null,
+    val precioError: String? = null,
+    val imagenError: String? = null,
+    val categoriaError: String? = null
 )
