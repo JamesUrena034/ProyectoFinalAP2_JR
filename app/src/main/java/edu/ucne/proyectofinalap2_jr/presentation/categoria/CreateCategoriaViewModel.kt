@@ -24,15 +24,28 @@ class CreateCategoriaViewModel @Inject constructor(
         it.copy(nombre = value, nombreError = if (value.isBlank()) "Nombre es requerido" else null)
     }
 
-    fun onDescripcionChange(value: String) = _state.update { it.copy(descripcion = value) }
+    fun onDescripcionChange(value: String) = _state.update {
+        it.copy(descripcion = value, descripcionError = if (value.isBlank()) "Descripción es requerida" else null)
+    }
 
-    fun onImagenChange(value: String) = _state.update { it.copy(imagen = value) }
+    fun onImagenChange(value: String) = _state.update {
+        it.copy(imagen = value, imagenError = if (value.isBlank()) "URL de imagen es requerida" else null)
+    }
 
     fun save() {
         val s = _state.value
         val nombreError = if (s.nombre.isBlank()) "Nombre es requerido" else null
-        if (nombreError != null) {
-            _state.update { it.copy(nombreError = nombreError) }
+        val descripcionError = if (s.descripcion.isBlank()) "Descripción es requerida" else null
+        val imagenError = if (s.imagen.isBlank()) "URL de imagen es requerida" else null
+
+        if (nombreError != null || descripcionError != null || imagenError != null) {
+            _state.update {
+                it.copy(
+                    nombreError = nombreError,
+                    descripcionError = descripcionError,
+                    imagenError = imagenError
+                )
+            }
             return
         }
         viewModelScope.launch {
