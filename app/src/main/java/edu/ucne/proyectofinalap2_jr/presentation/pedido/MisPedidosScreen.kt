@@ -59,14 +59,36 @@ fun MisPedidosBodyScreen(
                     color = Color.Gray,
                     modifier = Modifier.align(Alignment.Center)
                 )
-                else -> LazyColumn(
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(state.pedidos) { pedido ->
-                        PedidoCard(
-                            pedido = pedido,
-                            onClick = { onPedidoClick(pedido.pedidoId) }
+                else -> Column(modifier = Modifier.fillMaxSize()) {
+                    LazyColumn(
+                        modifier = Modifier.weight(1f),
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(state.pedidos) { pedido ->
+                            PedidoCard(
+                                pedido = pedido,
+                                onClick = { onPedidoClick(pedido.pedidoId) }
+                            )
+                        }
+                    }
+                    HorizontalDivider()
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            "Total pedidos: ${state.pedidos.size}",
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Text(
+                            "Total: $${String.format("%,.2f", state.pedidos.sumOf { it.total })}",
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary,
+                            style = MaterialTheme.typography.bodyMedium
                         )
                     }
                 }

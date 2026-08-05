@@ -55,7 +55,10 @@ fun ProductoListBodyScreen(
         },
         floatingActionButton = {
             if (isAdmin) {
-                FloatingActionButton(onClick = onCreateClick) {
+                FloatingActionButton(
+                    onClick = onCreateClick,
+                    modifier = Modifier.padding(bottom = 80.dp)
+                ) {
                     Icon(Icons.Default.Add, contentDescription = "Agregar")
                 }
             }
@@ -80,16 +83,38 @@ fun ProductoListBodyScreen(
                     color = Color.Gray,
                     modifier = Modifier.align(Alignment.Center)
                 )
-                else -> LazyColumn(
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(state.productos) { producto ->
-                        ProductoListItem(
-                            producto = producto,
-                            isAdmin = isAdmin,
-                            onClick = { onProductoClick(producto.productoId) },
-                            onDelete = { onDeleteClick(producto.productoId) }
+                else -> Column(modifier = Modifier.fillMaxSize()) {
+                    LazyColumn(
+                        modifier = Modifier.weight(1f),
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(state.productos) { producto ->
+                            ProductoListItem(
+                                producto = producto,
+                                isAdmin = isAdmin,
+                                onClick = { onProductoClick(producto.productoId) },
+                                onDelete = { onDeleteClick(producto.productoId) }
+                            )
+                        }
+                    }
+                    HorizontalDivider()
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            "Total productos: ${state.productos.size}",
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Text(
+                            "Total: $${String.format("%,.2f", state.productos.sumOf { it.precio })}",
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary,
+                            style = MaterialTheme.typography.bodyMedium
                         )
                     }
                 }

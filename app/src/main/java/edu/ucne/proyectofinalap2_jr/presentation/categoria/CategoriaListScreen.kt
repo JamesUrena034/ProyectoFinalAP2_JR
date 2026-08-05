@@ -27,7 +27,7 @@ import edu.ucne.proyectofinalap2_jr.domain.model.Categoria
 fun CategoriaListScreen(
     viewModel: CategoriaListViewModel = hiltViewModel(),
     onCreateClick: () -> Unit,
-    onCategoriaClick: (String) -> Unit,
+    onCategoriaClick: (String, String) -> Unit,
     isAdmin: Boolean = false
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -45,7 +45,7 @@ fun CategoriaListScreen(
 fun CategoriaListBodyScreen(
     state: CategoriaListUiState,
     onCreateClick: () -> Unit,
-    onCategoriaClick: (String) -> Unit,
+    onCategoriaClick: (String, String) -> Unit,
     onDeleteClick: (String) -> Unit,
     isAdmin: Boolean = false
 ) {
@@ -75,16 +75,33 @@ fun CategoriaListBodyScreen(
                     color = Color.Gray,
                     modifier = Modifier.align(Alignment.Center)
                 )
-                else -> LazyColumn(
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(state.categorias) { categoria ->
-                        CategoriaItem(
-                            categoria = categoria,
-                            isAdmin = isAdmin,
-                            onClick = { onCategoriaClick(categoria.categoriaId) },
-                            onDelete = { onDeleteClick(categoria.categoriaId) }
+                else -> Column(modifier = Modifier.fillMaxSize()) {
+                    LazyColumn(
+                        modifier = Modifier.weight(1f),
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(state.categorias) { categoria ->
+                            CategoriaItem(
+                                categoria = categoria,
+                                isAdmin = isAdmin,
+                                onClick = {
+                                    onCategoriaClick(categoria.categoriaId, categoria.nombre)
+                                },
+                                onDelete = { onDeleteClick(categoria.categoriaId) }
+                            )
+                        }
+                    }
+                    HorizontalDivider()
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        Text(
+                            "Total categorías: ${state.categorias.size}",
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.bodyMedium
                         )
                     }
                 }
@@ -144,7 +161,7 @@ fun CategoriaListBodyScreenPreview() {
         CategoriaListBodyScreen(
             state = CategoriaListUiState(),
             onCreateClick = {},
-            onCategoriaClick = {},
+            onCategoriaClick = { _, _ -> },
             onDeleteClick = {},
             isAdmin = true
         )

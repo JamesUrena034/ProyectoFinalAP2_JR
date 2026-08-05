@@ -28,6 +28,7 @@ fun BottomNavBar(
             BottomNavItem("Inicio", Icons.Default.Home, Screen.Home),
             BottomNavItem("Productos", Icons.Default.Inventory, Screen.AdminProductos),
             BottomNavItem("Categorías", Icons.Default.Category, Screen.Categorias),
+            BottomNavItem("Carrito", Icons.Default.ShoppingCart, Screen.Carrito),
             BottomNavItem("Pedidos", Icons.Default.Receipt, Screen.AdminPedidos),
             BottomNavItem("Perfil", Icons.Default.Person, Screen.Perfil)
         )
