@@ -39,6 +39,11 @@ android {
     buildFeatures {
         compose = true
     }
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
 }
 
 dependencies {
@@ -51,8 +56,6 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.navigation3.runtime)
-
 
     // Hilt
     implementation(libs.hilt.android)
@@ -94,6 +97,9 @@ dependencies {
     testImplementation(libs.mockk)
     testImplementation(libs.androidx.core.testing)
     testImplementation(libs.hilt.android.testing)
+    testImplementation("androidx.arch.core:core-testing:2.2.0")
+    testImplementation(libs.robolectric)
+    testImplementation("com.google.dagger:hilt-android-testing:2.59.2")
     kspTest(libs.hilt.android.compiler)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
