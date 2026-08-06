@@ -91,6 +91,7 @@ dependencies {
     implementation(libs.googleid)
 
     // Testing
+    testImplementation(libs.turbine)
     testImplementation(libs.junit)
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
     testImplementation(libs.mockk)
