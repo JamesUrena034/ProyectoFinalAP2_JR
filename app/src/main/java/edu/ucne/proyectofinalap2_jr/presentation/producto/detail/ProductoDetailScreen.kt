@@ -19,6 +19,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import edu.ucne.proyectofinalap2_jr.domain.model.CarritoItem
+import edu.ucne.proyectofinalap2_jr.domain.model.Producto
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -97,6 +98,16 @@ fun ProductoDetailBodyScreen(
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary
                             )
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                if (producto.stock > 0)
+                                    "Stock disponible: ${producto.stock}"
+                                else
+                                    "Sin stock disponible",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = if (producto.stock > 0) Color.Green else Color.Red,
+                                fontWeight = FontWeight.Bold
+                            )
                             Spacer(Modifier.height(8.dp))
                             Text(
                                 producto.descripcion,
@@ -116,11 +127,17 @@ fun ProductoDetailBodyScreen(
                                         )
                                     )
                                 },
+                                enabled = producto.stock > 0,
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 Icon(Icons.Default.ShoppingCart, contentDescription = null)
                                 Spacer(Modifier.width(8.dp))
-                                Text("Agregar al Carrito")
+                                Text(
+                                    if (producto.stock > 0)
+                                        "Agregar al Carrito"
+                                    else
+                                        "Sin stock disponible"
+                                )
                             }
                         }
                     }
@@ -135,7 +152,16 @@ fun ProductoDetailBodyScreen(
 fun ProductoDetailBodyScreenPreview() {
     MaterialTheme {
         ProductoDetailBodyScreen(
-            state = ProductoDetailUiState(),
+            state = ProductoDetailUiState(
+                producto = Producto(
+                    productoId = "1",
+                    nombre = "Silla Napoleon",
+                    descripcion = "Silla transparente para eventos",
+                    precio = 150.0,
+                    imagen = "",
+                    stock = 10
+                )
+            ),
             onBack = {},
             onAgregarAlCarrito = {}
         )
