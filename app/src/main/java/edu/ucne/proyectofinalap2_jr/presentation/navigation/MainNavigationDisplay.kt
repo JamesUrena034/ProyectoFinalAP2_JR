@@ -31,6 +31,7 @@ import edu.ucne.proyectofinalap2_jr.presentation.producto.detail.ProductoDetailS
 import edu.ucne.proyectofinalap2_jr.presentation.producto.list.ProductoListScreen
 import edu.ucne.proyectofinalap2_jr.presentation.producto.list.ProductosPorCategoriaScreen
 import kotlinx.coroutines.launch
+import edu.ucne.proyectofinalap2_jr.presentation.pedido.AdminPedidosScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -320,7 +321,7 @@ fun MainNavigationDisplay() {
                 }
 
                 composable<Screen.AdminPedidos> {
-                    MisPedidosScreen(
+                    AdminPedidosScreen(
                         onPedidoClick = { id ->
                             navController.navigate(Screen.DetallePedido(id))
                         }

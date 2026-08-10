@@ -8,6 +8,7 @@ data class CreateProductoUiState(
     val imagen: String = "",
     val categoriaId: String = "",
     val disponible: Boolean = true,
+    val stock: Int = 0,
     val isLoading: Boolean = false,
     val isSaving: Boolean = false,
     val savedSuccessfully: Boolean = false,
@@ -16,5 +17,6 @@ data class CreateProductoUiState(
     val descripcionError: String? = null,
     val precioError: String? = null,
     val imagenError: String? = null,
-    val categoriaError: String? = null
+    val categoriaError: String? = null,
+    val stockError: String? = null
 )
