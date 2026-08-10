@@ -37,7 +37,8 @@ class CreateProductoViewModel @Inject constructor(
                         precio = p.precio,
                         imagen = p.imagen,
                         categoriaId = p.categoriaId,
-                        disponible = p.disponible
+                        disponible = p.disponible,
+                        stock = p.stock
                     )
                 }
             }
@@ -75,6 +76,21 @@ class CreateProductoViewModel @Inject constructor(
         it.copy(categoriaId = value, categoriaError = if (value.isBlank()) "Categoría es requerida" else null)
     }
 
+    fun onStockChange(value: String) {
+        val s = value.toIntOrNull()
+        _state.update {
+            it.copy(
+                stock = s ?: 0,
+                stockError = when {
+                    value.isBlank() -> "Stock es requerido"
+                    s == null -> "Ingrese un número válido"
+                    s < 0 -> "El stock no puede ser negativo"
+                    else -> null
+                }
+            )
+        }
+    }
+
     fun save() {
         val s = _state.value
         val nombreError = if (s.nombre.isBlank()) "Nombre es requerido" else null
@@ -82,16 +98,19 @@ class CreateProductoViewModel @Inject constructor(
         val precioError = if (s.precio <= 0) "El precio debe ser mayor a 0" else null
         val imagenError = if (s.imagen.isBlank()) "URL de imagen es requerida" else null
         val categoriaError = if (s.categoriaId.isBlank()) "Categoría es requerida" else null
+        val stockError = if (s.stock < 0) "El stock no puede ser negativo" else null
 
         if (nombreError != null || descripcionError != null || precioError != null ||
-            imagenError != null || categoriaError != null) {
+            imagenError != null || categoriaError != null || stockError != null
+        ) {
             _state.update {
                 it.copy(
                     nombreError = nombreError,
                     descripcionError = descripcionError,
                     precioError = precioError,
                     imagenError = imagenError,
-                    categoriaError = categoriaError
+                    categoriaError = categoriaError,
+                    stockError = stockError
                 )
             }
             return
@@ -107,7 +126,8 @@ class CreateProductoViewModel @Inject constructor(
                         precio = s.precio,
                         imagen = s.imagen,
                         categoriaId = s.categoriaId,
-                        disponible = s.disponible
+                        disponible = s.disponible,
+                        stock = s.stock
                     )
                 )
                 _state.update { it.copy(isSaving = false, savedSuccessfully = true) }
