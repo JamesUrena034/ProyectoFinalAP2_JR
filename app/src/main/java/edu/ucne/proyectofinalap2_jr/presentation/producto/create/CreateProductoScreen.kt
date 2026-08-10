@@ -44,6 +44,7 @@ fun CreateProductoScreen(
         onPrecioChange = viewModel::onPrecioChange,
         onImagenChange = viewModel::onImagenChange,
         onCategoriaChange = viewModel::onCategoriaChange,
+        onStockChange = viewModel::onStockChange,
         onSave = viewModel::save
     )
 }
@@ -58,6 +59,7 @@ fun CreateProductoBodyScreen(
     onPrecioChange: (String) -> Unit,
     onImagenChange: (String) -> Unit,
     onCategoriaChange: (String) -> Unit,
+    onStockChange: (String) -> Unit,
     onSave: () -> Unit
 ) {
     Scaffold(
@@ -136,6 +138,18 @@ fun CreateProductoBodyScreen(
                     }
 
                     OutlinedTextField(
+                        value = if (state.stock == 0) "" else state.stock.toString(),
+                        onValueChange = onStockChange,
+                        label = { Text("Stock disponible") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        isError = state.stockError != null,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    state.stockError?.let {
+                        Text(it, color = Color.Red, style = MaterialTheme.typography.bodySmall)
+                    }
+
+                    OutlinedTextField(
                         value = state.imagen,
                         onValueChange = onImagenChange,
                         label = { Text("URL de imagen") },
@@ -200,6 +214,7 @@ fun CreateProductoBodyScreenPreview() {
             onPrecioChange = {},
             onImagenChange = {},
             onCategoriaChange = {},
+            onStockChange = {},
             onSave = {}
         )
     }
