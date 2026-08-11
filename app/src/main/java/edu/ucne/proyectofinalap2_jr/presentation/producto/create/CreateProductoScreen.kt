@@ -6,6 +6,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import edu.ucne.proyectofinalap2_jr.domain.model.Categoria
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,7 +45,8 @@ fun CreateProductoScreen(
         onDescripcionChange = viewModel::onDescripcionChange,
         onPrecioChange = viewModel::onPrecioChange,
         onImagenChange = viewModel::onImagenChange,
-        onCategoriaChange = viewModel::onCategoriaChange,
+        onCategoriaSelected = viewModel::onCategoriaSelected,
+        onStockChange = viewModel::onStockChange,
         onSave = viewModel::save
     )
 }
@@ -57,9 +60,12 @@ fun CreateProductoBodyScreen(
     onDescripcionChange: (String) -> Unit,
     onPrecioChange: (String) -> Unit,
     onImagenChange: (String) -> Unit,
-    onCategoriaChange: (String) -> Unit,
+    onCategoriaSelected: (Categoria) -> Unit,
+    onStockChange: (String) -> Unit,
     onSave: () -> Unit
 ) {
+    var expandedCategoria by remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -136,6 +142,18 @@ fun CreateProductoBodyScreen(
                     }
 
                     OutlinedTextField(
+                        value = if (state.stock == 0) "" else state.stock.toString(),
+                        onValueChange = onStockChange,
+                        label = { Text("Stock disponible") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        isError = state.stockError != null,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    state.stockError?.let {
+                        Text(it, color = Color.Red, style = MaterialTheme.typography.bodySmall)
+                    }
+
+                    OutlinedTextField(
                         value = state.imagen,
                         onValueChange = onImagenChange,
                         label = { Text("URL de imagen") },
@@ -146,13 +164,38 @@ fun CreateProductoBodyScreen(
                         Text(it, color = Color.Red, style = MaterialTheme.typography.bodySmall)
                     }
 
-                    OutlinedTextField(
-                        value = state.categoriaId,
-                        onValueChange = onCategoriaChange,
-                        label = { Text("ID Categoría") },
-                        isError = state.categoriaError != null,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                    ExposedDropdownMenuBox(
+                        expanded = expandedCategoria,
+                        onExpandedChange = { expandedCategoria = it }
+                    ) {
+                        OutlinedTextField(
+                            value = state.categoriaNombre.ifBlank { "Selecciona una categoría" },
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Categoría") },
+                            isError = state.categoriaError != null,
+                            trailingIcon = {
+                                Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .menuAnchor()
+                        )
+                        ExposedDropdownMenu(
+                            expanded = expandedCategoria,
+                            onDismissRequest = { expandedCategoria = false }
+                        ) {
+                            state.categorias.forEach { categoria ->
+                                DropdownMenuItem(
+                                    text = { Text(categoria.nombre) },
+                                    onClick = {
+                                        onCategoriaSelected(categoria)
+                                        expandedCategoria = false
+                                    }
+                                )
+                            }
+                        }
+                    }
                     state.categoriaError?.let {
                         Text(it, color = Color.Red, style = MaterialTheme.typography.bodySmall)
                     }
@@ -199,7 +242,8 @@ fun CreateProductoBodyScreenPreview() {
             onDescripcionChange = {},
             onPrecioChange = {},
             onImagenChange = {},
-            onCategoriaChange = {},
+            onCategoriaSelected = {},
+            onStockChange = {},
             onSave = {}
         )
     }
