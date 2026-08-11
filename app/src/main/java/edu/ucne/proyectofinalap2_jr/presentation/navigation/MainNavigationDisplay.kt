@@ -10,10 +10,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import androidx.navigation.toRoute
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.ui.NavDisplay
 import edu.ucne.proyectofinalap2_jr.presentation.auth.AuthIntent
 import edu.ucne.proyectofinalap2_jr.presentation.auth.AuthViewModel
 import edu.ucne.proyectofinalap2_jr.presentation.auth.LoginScreen
@@ -23,6 +22,7 @@ import edu.ucne.proyectofinalap2_jr.presentation.categoria.CategoriaListScreen
 import edu.ucne.proyectofinalap2_jr.presentation.categoria.CreateCategoriaScreen
 import edu.ucne.proyectofinalap2_jr.presentation.categoria.EditCategoriaScreen
 import edu.ucne.proyectofinalap2_jr.presentation.home.HomeScreen
+import edu.ucne.proyectofinalap2_jr.presentation.pedido.AdminPedidosScreen
 import edu.ucne.proyectofinalap2_jr.presentation.pedido.DetallePedidoScreen
 import edu.ucne.proyectofinalap2_jr.presentation.pedido.MisPedidosScreen
 import edu.ucne.proyectofinalap2_jr.presentation.perfil.PerfilScreen
@@ -31,43 +31,45 @@ import edu.ucne.proyectofinalap2_jr.presentation.producto.detail.ProductoDetailS
 import edu.ucne.proyectofinalap2_jr.presentation.producto.list.ProductoListScreen
 import edu.ucne.proyectofinalap2_jr.presentation.producto.list.ProductosPorCategoriaScreen
 import kotlinx.coroutines.launch
-import edu.ucne.proyectofinalap2_jr.presentation.pedido.AdminPedidosScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainNavigationDisplay() {
-    val navController = rememberNavController()
     val authViewModel: AuthViewModel = hiltViewModel()
     val authState by authViewModel.state.collectAsStateWithLifecycle()
     val carritoViewModel: CarritoViewModel = hiltViewModel()
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-
     val isAdmin = authState.isAdmin
+
+    val backStack = rememberNavBackStack(
+        if (authState.user != null) Screen.Home else Screen.Login
+    )
 
     LaunchedEffect(authState.user) {
         if (authState.user == null) {
-            navController.navigate(Screen.Login) {
-                popUpTo(0) { inclusive = true }
+            while (backStack.size > 1) {
+                backStack.removeAt(backStack.size - 1)
             }
+            backStack[0] = Screen.Login
         }
     }
 
-    if (authState.user == null) {
-        NavHost(
-            navController = navController,
-            startDestination = Screen.Login
-        ) {
-            composable<Screen.Login> {
-                LoginScreen(
-                    onLoginSuccess = {
-                        navController.navigate(Screen.Home) {
-                            popUpTo(Screen.Login) { inclusive = true }
+    val showDrawer = backStack.lastOrNull() !is Screen.Login
+
+    if (!showDrawer) {
+        NavDisplay(
+            backStack = backStack,
+            entryProvider = entryProvider {
+                entry<Screen.Login> {
+                    LoginScreen(
+                        onLoginSuccess = {
+                            backStack.add(Screen.Home)
                         }
-                    }
-                )
+                    )
+                }
             }
-        }
+        )
         return
     }
 
@@ -104,7 +106,7 @@ fun MainNavigationDisplay() {
                     label = { Text("Inicio") },
                     selected = false,
                     onClick = {
-                        navController.navigate(Screen.Home) { launchSingleTop = true }
+                        backStack.add(Screen.Home)
                         scope.launch { drawerState.close() }
                     }
                 )
@@ -115,7 +117,7 @@ fun MainNavigationDisplay() {
                         label = { Text("Productos") },
                         selected = false,
                         onClick = {
-                            navController.navigate(Screen.AdminProductos) { launchSingleTop = true }
+                            backStack.add(Screen.AdminProductos)
                             scope.launch { drawerState.close() }
                         }
                     )
@@ -126,7 +128,7 @@ fun MainNavigationDisplay() {
                     label = { Text("Categorías") },
                     selected = false,
                     onClick = {
-                        navController.navigate(Screen.Categorias) { launchSingleTop = true }
+                        backStack.add(Screen.Categorias)
                         scope.launch { drawerState.close() }
                     }
                 )
@@ -136,7 +138,7 @@ fun MainNavigationDisplay() {
                     label = { Text("Carrito") },
                     selected = false,
                     onClick = {
-                        navController.navigate(Screen.Carrito) { launchSingleTop = true }
+                        backStack.add(Screen.Carrito)
                         scope.launch { drawerState.close() }
                     }
                 )
@@ -147,9 +149,9 @@ fun MainNavigationDisplay() {
                     selected = false,
                     onClick = {
                         if (isAdmin) {
-                            navController.navigate(Screen.AdminPedidos) { launchSingleTop = true }
+                            backStack.add(Screen.AdminPedidos)
                         } else {
-                            navController.navigate(Screen.MisPedidos) { launchSingleTop = true }
+                            backStack.add(Screen.MisPedidos)
                         }
                         scope.launch { drawerState.close() }
                     }
@@ -160,7 +162,7 @@ fun MainNavigationDisplay() {
                     label = { Text("Perfil") },
                     selected = false,
                     onClick = {
-                        navController.navigate(Screen.Perfil) { launchSingleTop = true }
+                        backStack.add(Screen.Perfil)
                         scope.launch { drawerState.close() }
                     }
                 )
@@ -192,150 +194,161 @@ fun MainNavigationDisplay() {
                 )
             }
         ) { padding ->
-            NavHost(
-                navController = navController,
-                startDestination = Screen.Home,
-                modifier = Modifier.padding(padding)
-            ) {
-                composable<Screen.Login> {
-                    LoginScreen(
-                        onLoginSuccess = {
-                            navController.navigate(Screen.Home) {
-                                popUpTo(Screen.Login) { inclusive = true }
+            NavDisplay(
+                backStack = backStack,
+                modifier = Modifier.padding(padding),
+                entryProvider = entryProvider {
+
+                    entry<Screen.Login> {
+                        LoginScreen(
+                            onLoginSuccess = {
+                                backStack.add(Screen.Home)
                             }
-                        }
-                    )
-                }
+                        )
+                    }
 
-                composable<Screen.Home> {
-                    HomeScreen(
-                        onProductoClick = { id ->
-                            navController.navigate(Screen.ProductoDetail(id))
-                        }
-                    )
-                }
-
-                composable<Screen.Categorias> {
-                    CategoriaListScreen(
-                        onCreateClick = {
-                            navController.navigate(Screen.CreateCategoria)
-                        },
-                        onCategoriaClick = { id, nombre ->
-                            if (isAdmin) {
-                                navController.navigate(Screen.EditCategoria(id))
-                            } else {
-                                navController.navigate(Screen.ProductosPorCategoria(id, nombre))
+                    entry<Screen.Home> {
+                        HomeScreen(
+                            onProductoClick = { id ->
+                                backStack.add(Screen.ProductoDetail(id))
                             }
-                        },
-                        isAdmin = isAdmin
-                    )
-                }
+                        )
+                    }
 
-                composable<Screen.CreateCategoria> {
-                    CreateCategoriaScreen(
-                        onBack = { navController.navigateUp() }
-                    )
-                }
+                    entry<Screen.Categorias> {
+                        CategoriaListScreen(
+                            onCreateClick = {
+                                backStack.add(Screen.CreateCategoria)
+                            },
+                            onCategoriaClick = { id, nombre ->
+                                if (isAdmin) {
+                                    backStack.add(Screen.EditCategoria(id))
+                                } else {
+                                    backStack.add(Screen.ProductosPorCategoria(id, nombre))
+                                }
+                            },
+                            isAdmin = isAdmin
+                        )
+                    }
 
-                composable<Screen.EditCategoria> {
-                    val args = it.toRoute<Screen.EditCategoria>()
-                    EditCategoriaScreen(
-                        categoriaId = args.categoriaId,
-                        onBack = { navController.navigateUp() }
-                    )
-                }
-
-                composable<Screen.ProductosPorCategoria> {
-                    val args = it.toRoute<Screen.ProductosPorCategoria>()
-                    ProductosPorCategoriaScreen(
-                        categoriaId = args.categoriaId,
-                        categoriaNombre = args.categoriaNombre,
-                        onProductoClick = { id ->
-                            navController.navigate(Screen.ProductoDetail(id))
-                        },
-                        onBack = { navController.navigateUp() }
-                    )
-                }
-
-                composable<Screen.AdminProductos> {
-                    ProductoListScreen(
-                        onProductoClick = { id ->
-                            if (isAdmin) {
-                                navController.navigate(Screen.ProductoCreate(id))
-                            } else {
-                                navController.navigate(Screen.ProductoDetail(id))
+                    entry<Screen.CreateCategoria> {
+                        CreateCategoriaScreen(
+                            onBack = {
+                                if (backStack.isNotEmpty())
+                                    backStack.removeAt(backStack.size - 1)
                             }
-                        },
-                        onCreateClick = {
-                            navController.navigate(Screen.ProductoCreate())
-                        },
-                        isAdmin = isAdmin
-                    )
-                }
+                        )
+                    }
 
-                composable<Screen.ProductoDetail> {
-                    val args = it.toRoute<Screen.ProductoDetail>()
-                    ProductoDetailScreen(
-                        productoId = args.productoId,
-                        onBack = { navController.navigateUp() },
-                        onAgregarAlCarrito = { item ->
-                            carritoViewModel.agregarItem(item)
-                            navController.navigateUp()
-                        }
-                    )
-                }
-
-                composable<Screen.ProductoCreate> {
-                    val args = it.toRoute<Screen.ProductoCreate>()
-                    CreateProductoScreen(
-                        productoId = args.productoId,
-                        onBack = { navController.navigateUp() }
-                    )
-                }
-
-                composable<Screen.Carrito> {
-                    CarritoScreen(
-                        viewModel = carritoViewModel,
-                        onPedidoExitoso = {
-                            navController.navigate(Screen.MisPedidos) {
-                                launchSingleTop = true
+                    entry<Screen.EditCategoria> { key ->
+                        EditCategoriaScreen(
+                            categoriaId = key.categoriaId,
+                            onBack = {
+                                if (backStack.isNotEmpty())
+                                    backStack.removeAt(backStack.size - 1)
                             }
-                        }
-                    )
-                }
+                        )
+                    }
 
-                composable<Screen.MisPedidos> {
-                    MisPedidosScreen(
-                        onPedidoClick = { id ->
-                            navController.navigate(Screen.DetallePedido(id))
-                        }
-                    )
-                }
+                    entry<Screen.ProductosPorCategoria> { key ->
+                        ProductosPorCategoriaScreen(
+                            categoriaId = key.categoriaId,
+                            categoriaNombre = key.categoriaNombre,
+                            onProductoClick = { id ->
+                                backStack.add(Screen.ProductoDetail(id))
+                            },
+                            onBack = {
+                                if (backStack.isNotEmpty())
+                                    backStack.removeAt(backStack.size - 1)
+                            }
+                        )
+                    }
 
-                composable<Screen.DetallePedido> {
-                    val args = it.toRoute<Screen.DetallePedido>()
-                    DetallePedidoScreen(
-                        pedidoId = args.pedidoId,
-                        onBack = { navController.navigateUp() }
-                    )
-                }
+                    entry<Screen.AdminProductos> {
+                        ProductoListScreen(
+                            onProductoClick = { id ->
+                                if (isAdmin) {
+                                    backStack.add(Screen.ProductoCreate(id))
+                                } else {
+                                    backStack.add(Screen.ProductoDetail(id))
+                                }
+                            },
+                            onCreateClick = {
+                                backStack.add(Screen.ProductoCreate())
+                            },
+                            isAdmin = isAdmin
+                        )
+                    }
 
-                composable<Screen.AdminPedidos> {
-                    AdminPedidosScreen(
-                        onPedidoClick = { id ->
-                            navController.navigate(Screen.DetallePedido(id))
-                        }
-                    )
-                }
+                    entry<Screen.ProductoDetail> { key ->
+                        ProductoDetailScreen(
+                            productoId = key.productoId,
+                            onBack = {
+                                if (backStack.isNotEmpty())
+                                    backStack.removeAt(backStack.size - 1)
+                            },
+                            onAgregarAlCarrito = { item ->
+                                carritoViewModel.agregarItem(item)
+                                if (backStack.isNotEmpty())
+                                    backStack.removeAt(backStack.size - 1)
+                            }
+                        )
+                    }
 
-                composable<Screen.Perfil> {
-                    PerfilScreen(
-                        onSignOut = {
-                            authViewModel.processIntent(AuthIntent.SignOut)
-                        }
-                    )
+                    entry<Screen.ProductoCreate> { key ->
+                        CreateProductoScreen(
+                            productoId = key.productoId,
+                            onBack = {
+                                if (backStack.isNotEmpty())
+                                    backStack.removeAt(backStack.size - 1)
+                            }
+                        )
+                    }
+
+                    entry<Screen.Carrito> {
+                        CarritoScreen(
+                            viewModel = carritoViewModel,
+                            onPedidoExitoso = {
+                                backStack.add(Screen.MisPedidos)
+                            }
+                        )
+                    }
+
+                    entry<Screen.MisPedidos> {
+                        MisPedidosScreen(
+                            onPedidoClick = { id ->
+                                backStack.add(Screen.DetallePedido(id))
+                            }
+                        )
+                    }
+
+                    entry<Screen.DetallePedido> { key ->
+                        DetallePedidoScreen(
+                            pedidoId = key.pedidoId,
+                            onBack = {
+                                if (backStack.isNotEmpty())
+                                    backStack.removeAt(backStack.size - 1)
+                            }
+                        )
+                    }
+
+                    entry<Screen.AdminPedidos> {
+                        AdminPedidosScreen(
+                            onPedidoClick = { id ->
+                                backStack.add(Screen.DetallePedido(id))
+                            }
+                        )
+                    }
+
+                    entry<Screen.Perfil> {
+                        PerfilScreen(
+                            onSignOut = {
+                                authViewModel.processIntent(AuthIntent.SignOut)
+                            }
+                        )
+                    }
                 }
-            }
+            )
         }
     }
 }
