@@ -1,5 +1,7 @@
 package edu.ucne.proyectofinalap2_jr.presentation.producto.create
 
+import edu.ucne.proyectofinalap2_jr.domain.model.Categoria
+
 data class CreateProductoUiState(
     val productoId: String = "",
     val nombre: String = "",
@@ -7,6 +9,8 @@ data class CreateProductoUiState(
     val precio: Double = 0.0,
     val imagen: String = "",
     val categoriaId: String = "",
+    val categoriaNombre: String = "",
+    val categorias: List<Categoria> = emptyList(),
     val disponible: Boolean = true,
     val stock: Int = 0,
     val isLoading: Boolean = false,
