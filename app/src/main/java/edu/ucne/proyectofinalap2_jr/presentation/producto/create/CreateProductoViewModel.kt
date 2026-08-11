@@ -3,7 +3,9 @@ package edu.ucne.proyectofinalap2_jr.presentation.producto.create
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import edu.ucne.proyectofinalap2_jr.domain.model.Categoria
 import edu.ucne.proyectofinalap2_jr.domain.model.Producto
+import edu.ucne.proyectofinalap2_jr.domain.usecase.categoria.GetCategoriasUseCase
 import edu.ucne.proyectofinalap2_jr.domain.usecase.producto.GetProductoByIdUseCase
 import edu.ucne.proyectofinalap2_jr.domain.usecase.producto.SaveProductoUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,11 +18,22 @@ import javax.inject.Inject
 @HiltViewModel
 class CreateProductoViewModel @Inject constructor(
     private val saveProductoUseCase: SaveProductoUseCase,
-    private val getProductoByIdUseCase: GetProductoByIdUseCase
+    private val getProductoByIdUseCase: GetProductoByIdUseCase,
+    private val getCategoriasUseCase: GetCategoriasUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(CreateProductoUiState())
     val state: StateFlow<CreateProductoUiState> = _state.asStateFlow()
+
+    init { loadCategorias() }
+
+    private fun loadCategorias() {
+        viewModelScope.launch {
+            getCategoriasUseCase().collect { categorias ->
+                _state.update { it.copy(categorias = categorias) }
+            }
+        }
+    }
 
     fun load(id: String) {
         if (id.isBlank()) return
@@ -72,8 +85,12 @@ class CreateProductoViewModel @Inject constructor(
         it.copy(imagen = value, imagenError = if (value.isBlank()) "URL de imagen es requerida" else null)
     }
 
-    fun onCategoriaChange(value: String) = _state.update {
-        it.copy(categoriaId = value, categoriaError = if (value.isBlank()) "Categoría es requerida" else null)
+    fun onCategoriaSelected(categoria: Categoria) = _state.update {
+        it.copy(
+            categoriaId = categoria.categoriaId,
+            categoriaNombre = categoria.nombre,
+            categoriaError = null
+        )
     }
 
     fun onStockChange(value: String) {
