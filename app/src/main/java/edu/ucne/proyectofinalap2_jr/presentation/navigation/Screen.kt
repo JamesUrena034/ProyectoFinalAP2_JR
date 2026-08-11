@@ -4,7 +4,7 @@ import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.Serializable
 
 @Serializable
-sealed class Screen {
+sealed class Screen : NavKey {
 
     @Serializable data object Login : Screen()
     @Serializable data object Home : Screen()
@@ -19,5 +19,8 @@ sealed class Screen {
     @Serializable data object AdminPedidos : Screen()
     @Serializable data object CreateCategoria : Screen()
     @Serializable data class EditCategoria(val categoriaId: String) : Screen()
-    @Serializable data class ProductosPorCategoria(val categoriaId: String, val categoriaNombre: String) : Screen()
+    @Serializable data class ProductosPorCategoria(
+        val categoriaId: String,
+        val categoriaNombre: String
+    ) : Screen()
 }
