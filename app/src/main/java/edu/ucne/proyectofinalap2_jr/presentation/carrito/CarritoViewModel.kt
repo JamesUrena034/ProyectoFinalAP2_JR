@@ -40,6 +40,18 @@ class CarritoViewModel @Inject constructor(
         }
         _state.update { it.copy(items = items) }
     }
+    fun cambiarCantidad(productoId: String, cantidad: Int) {
+        if (cantidad <= 0) {
+            eliminarItem(productoId)
+            return
+        }
+        val items = _state.value.items.toMutableList()
+        val index = items.indexOfFirst { it.productoId == productoId }
+        if (index >= 0) {
+            items[index] = items[index].copy(cantidad = cantidad)
+            _state.update { it.copy(items = items) }
+        }
+    }
 
     fun eliminarItem(productoId: String) {
         _state.update { it.copy(items = it.items.filter { i -> i.productoId != productoId }) }

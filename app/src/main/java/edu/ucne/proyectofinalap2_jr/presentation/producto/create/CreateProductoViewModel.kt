@@ -36,7 +36,11 @@ class CreateProductoViewModel @Inject constructor(
     }
 
     fun load(id: String) {
-        if (id.isBlank()) return
+        if (id.isBlank()) {
+            _state.value = CreateProductoUiState()
+            loadCategorias()
+            return
+        }
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
             val producto = getProductoByIdUseCase(id)
@@ -57,7 +61,6 @@ class CreateProductoViewModel @Inject constructor(
             }
         }
     }
-
     fun onNombreChange(value: String) = _state.update {
         it.copy(nombre = value, nombreError = if (value.isBlank()) "Nombre es requerido" else null)
     }
