@@ -305,15 +305,6 @@ fun MainNavigationDisplay() {
                         )
                     }
 
-                    entry<Screen.Carrito> {
-                        CarritoScreen(
-                            viewModel = carritoViewModel,
-                            onPedidoExitoso = {
-                                backStack.add(Screen.MisPedidos)
-                            }
-                        )
-                    }
-
                     entry<Screen.MisPedidos> {
                         MisPedidosScreen(
                             onPedidoClick = { id ->
@@ -344,6 +335,14 @@ fun MainNavigationDisplay() {
                         PerfilScreen(
                             onSignOut = {
                                 authViewModel.processIntent(AuthIntent.SignOut)
+                            }
+                        )
+                    }
+                    entry<Screen.Carrito> {
+                        CarritoScreen(
+                            viewModel = carritoViewModel,
+                            onPedidoExitoso = {
+                                backStack.add(Screen.MisPedidos)
                             }
                         )
                     }
