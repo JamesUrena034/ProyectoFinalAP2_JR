@@ -4,7 +4,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -32,6 +34,7 @@ fun CarritoScreen(
     CarritoBodyScreen(
         state = state,
         onEliminarItem = viewModel::eliminarItem,
+        onCambiarCantidad = viewModel::cambiarCantidad,
         onFechaInicioChange = viewModel::onFechaInicioChange,
         onFechaFinChange = viewModel::onFechaFinChange,
         onRealizarPedido = viewModel::realizarPedido
@@ -43,6 +46,7 @@ fun CarritoScreen(
 fun CarritoBodyScreen(
     state: CarritoUiState,
     onEliminarItem: (String) -> Unit,
+    onCambiarCantidad: (String, Int) -> Unit,
     onFechaInicioChange: (String) -> Unit,
     onFechaFinChange: (String) -> Unit,
     onRealizarPedido: () -> Unit
@@ -75,7 +79,10 @@ fun CarritoBodyScreen(
                         items(state.items) { item ->
                             CarritoItemCard(
                                 item = item,
-                                onEliminar = { onEliminarItem(item.productoId) }
+                                onEliminar = { onEliminarItem(item.productoId) },
+                                onCambiarCantidad = { cantidad ->
+                                    onCambiarCantidad(item.productoId, cantidad)
+                                }
                             )
                         }
                     }
@@ -149,7 +156,8 @@ fun CarritoBodyScreen(
 @Composable
 fun CarritoItemCard(
     item: CarritoItem,
-    onEliminar: () -> Unit
+    onEliminar: () -> Unit,
+    onCambiarCantidad: (Int) -> Unit
 ) {
     ElevatedCard(modifier = Modifier.fillMaxWidth()) {
         Row(
@@ -161,22 +169,30 @@ fun CarritoItemCard(
             Column(modifier = Modifier.weight(1f)) {
                 Text(item.nombre, fontWeight = FontWeight.Bold)
                 Text(
-                    "Cantidad: ${item.cantidad}",
-                    style = MaterialTheme.typography.bodySmall
-                )
-                Text(
                     "$${String.format("%,.2f", item.precio * item.cantidad)}",
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Bold
                 )
             }
-            IconButton(onClick = onEliminar) {
-                Icon(Icons.Default.Delete, contentDescription = "Eliminar", tint = Color.Red)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(onClick = { onCambiarCantidad(item.cantidad - 1) }) {
+                    Icon(Icons.Default.Remove, contentDescription = "Restar")
+                }
+                Text(
+                    "${item.cantidad}",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                IconButton(onClick = { onCambiarCantidad(item.cantidad + 1) }) {
+                    Icon(Icons.Default.Add, contentDescription = "Sumar")
+                }
+                IconButton(onClick = onEliminar) {
+                    Icon(Icons.Default.Delete, contentDescription = "Eliminar", tint = Color.Red)
+                }
             }
         }
     }
 }
-
 @Preview(showBackground = true)
 @Composable
 fun CarritoBodyScreenPreview() {
@@ -186,7 +202,8 @@ fun CarritoBodyScreenPreview() {
             onEliminarItem = {},
             onFechaInicioChange = {},
             onFechaFinChange = {},
-            onRealizarPedido = {}
+            onRealizarPedido = {},
+            onCambiarCantidad = { _, _ -> }
         )
     }
 }
