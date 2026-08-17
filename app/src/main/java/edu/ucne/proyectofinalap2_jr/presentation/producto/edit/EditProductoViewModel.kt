@@ -25,21 +25,17 @@ class EditProductoViewModel @Inject constructor(
     private val _state = MutableStateFlow(EditProductoUiState())
     val state: StateFlow<EditProductoUiState> = _state.asStateFlow()
 
-    init { loadCategorias() }
-
-    private fun loadCategorias() {
-        viewModelScope.launch {
-            getCategoriasUseCase().collect { categorias ->
-                _state.update { it.copy(categorias = categorias) }
-            }
-        }
-    }
-
     fun load(id: String) {
         if (id.isBlank()) return
+        _state.value = EditProductoUiState()
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
             try {
+                launch {
+                    getCategoriasUseCase().collect { categorias ->
+                        _state.update { it.copy(categorias = categorias) }
+                    }
+                }
                 val producto = productoRepository.getProductoById(id)
                 producto?.let { p ->
                     _state.update {
