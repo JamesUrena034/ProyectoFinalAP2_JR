@@ -1,9 +1,13 @@
 package edu.ucne.proyectofinalap2_jr.presentation.home
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -27,7 +31,9 @@ fun HomeScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     HomeBodyScreen(
         state = state,
-        onProductoClick = onProductoClick
+        onProductoClick = onProductoClick,
+        onBusquedaChange = viewModel::onBusquedaChange,
+        onCategoriaSelected = viewModel::onCategoriaSelected
     )
 }
 
@@ -35,7 +41,9 @@ fun HomeScreen(
 @Composable
 fun HomeBodyScreen(
     state: HomeUiState,
-    onProductoClick: (String) -> Unit
+    onProductoClick: (String) -> Unit,
+    onBusquedaChange: (String) -> Unit,
+    onCategoriaSelected: (String) -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -59,29 +67,65 @@ fun HomeBodyScreen(
                     modifier = Modifier.align(Alignment.Center)
                 )
                 else -> {
-                    LazyColumn(
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        item {
-                            Text(
-                                "Hola, ${state.userNombre}",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold
+                    Column(modifier = Modifier.fillMaxSize()) {
+
+                        // Buscador
+                        OutlinedTextField(
+                            value = state.busqueda,
+                            onValueChange = onBusquedaChange,
+                            placeholder = { Text("Buscar por ubicación...") },
+                            leadingIcon = {
+                                Icon(Icons.Default.Search, contentDescription = null)
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                            singleLine = true,
+                            shape = MaterialTheme.shapes.extraLarge
+                        )
+
+                        // Filtros por categoría
+                        Row(
+                            modifier = Modifier
+                                .horizontalScroll(rememberScrollState())
+                                .padding(horizontal = 16.dp, vertical = 4.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            FilterChip(
+                                selected = state.categoriaSeleccionada == "Todas",
+                                onClick = { onCategoriaSelected("Todas") },
+                                label = { Text("Todas") }
                             )
-                            Spacer(Modifier.height(8.dp))
-                            Text(
-                                "Productos destacados",
-                                style = MaterialTheme.typography.titleSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Spacer(Modifier.height(8.dp))
+                            state.categorias.forEach { categoria ->
+                                FilterChip(
+                                    selected = state.categoriaSeleccionada == categoria.categoriaId,
+                                    onClick = { onCategoriaSelected(categoria.categoriaId) },
+                                    label = { Text(categoria.nombre) }
+                                )
+                            }
                         }
-                        items(state.productos) { producto ->
-                            ProductoCard(
-                                producto = producto,
-                                onClick = { onProductoClick(producto.productoId) }
-                            )
+
+                        Spacer(Modifier.height(8.dp))
+
+                        if (state.productosFiltrados.isEmpty()) {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text("No hay productos disponibles", color = Color.Gray)
+                            }
+                        } else {
+                            LazyColumn(
+                                contentPadding = PaddingValues(16.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                items(state.productosFiltrados) { producto ->
+                                    ProductoCard(
+                                        producto = producto,
+                                        onClick = { onProductoClick(producto.productoId) }
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -126,11 +170,21 @@ fun ProductoCard(
                     maxLines = 2
                 )
                 Spacer(Modifier.height(4.dp))
-                Text(
-                    "$${String.format("%,.2f", producto.precio)}",
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
-                )
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        "$${String.format("%,.2f", producto.precio)}",
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        if (producto.stock > 0) "Stock: ${producto.stock}" else "Sin stock",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (producto.stock > 0) Color.Green else Color.Red
+                    )
+                }
             }
         }
     }
@@ -142,7 +196,9 @@ fun HomeBodyScreenPreview() {
     MaterialTheme {
         HomeBodyScreen(
             state = HomeUiState(),
-            onProductoClick = {}
+            onProductoClick = {},
+            onBusquedaChange = {},
+            onCategoriaSelected = {}
         )
     }
 }
