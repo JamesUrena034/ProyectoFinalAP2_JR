@@ -30,7 +30,10 @@ import edu.ucne.proyectofinalap2_jr.presentation.producto.create.CreateProductoS
 import edu.ucne.proyectofinalap2_jr.presentation.producto.detail.ProductoDetailScreen
 import edu.ucne.proyectofinalap2_jr.presentation.producto.list.ProductoListScreen
 import edu.ucne.proyectofinalap2_jr.presentation.producto.list.ProductosPorCategoriaScreen
+import edu.ucne.proyectofinalap2_jr.presentation.carrito.CheckoutScreen
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.collectAsState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -342,6 +345,22 @@ fun MainNavigationDisplay() {
                         CarritoScreen(
                             viewModel = carritoViewModel,
                             onPedidoExitoso = {
+                                backStack.add(Screen.MisPedidos)
+                            },
+                            onContinuarAlPago = { carritoState ->
+                                backStack.add(Screen.Checkout)
+                            }
+                        )
+                    }
+                    entry<Screen.Checkout> {
+                        CheckoutScreen(
+                            carritoState = carritoViewModel.state.collectAsState().value,
+                            onBack = {
+                                if (backStack.isNotEmpty())
+                                    backStack.removeAt(backStack.size - 1)
+                            },
+                            onPedidoExitoso = {
+                                carritoViewModel.limpiarCarrito()
                                 backStack.add(Screen.MisPedidos)
                             }
                         )
