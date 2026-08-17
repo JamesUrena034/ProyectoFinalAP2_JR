@@ -1,6 +1,8 @@
 package edu.ucne.proyectofinalap2_jr.presentation.categoria
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
@@ -75,7 +77,8 @@ fun EditCategoriaBodyScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(16.dp),
+                        .padding(16.dp)
+                        .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     if (state.imagen.isNotBlank()) {
@@ -104,16 +107,24 @@ fun EditCategoriaBodyScreen(
                         value = state.descripcion,
                         onValueChange = onDescripcionChange,
                         label = { Text("Descripción") },
+                        isError = state.descripcionError != null,
                         modifier = Modifier.fillMaxWidth(),
                         minLines = 3
                     )
+                    state.descripcionError?.let {
+                        Text(it, color = Color.Red, style = MaterialTheme.typography.bodySmall)
+                    }
 
                     OutlinedTextField(
                         value = state.imagen,
                         onValueChange = onImagenChange,
                         label = { Text("URL de imagen") },
+                        isError = state.imagenError != null,
                         modifier = Modifier.fillMaxWidth()
                     )
+                    state.imagenError?.let {
+                        Text(it, color = Color.Red, style = MaterialTheme.typography.bodySmall)
+                    }
 
                     if (state.error != null) {
                         Text(
