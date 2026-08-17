@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import edu.ucne.proyectofinalap2_jr.domain.repository.AuthRepository
+import edu.ucne.proyectofinalap2_jr.domain.usecase.categoria.GetCategoriasUseCase
 import edu.ucne.proyectofinalap2_jr.domain.usecase.producto.GetProductosUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,6 +16,7 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val getProductosUseCase: GetProductosUseCase,
+    private val getCategoriasUseCase: GetCategoriasUseCase,
     private val authRepository: AuthRepository
 ) : ViewModel() {
 
@@ -33,9 +35,22 @@ class HomeViewModel @Inject constructor(
                     userRol = userData?.rol ?: "usuario"
                 )
             }
-            getProductosUseCase().collect { productos ->
-                _state.update { it.copy(isLoading = false, productos = productos) }
+            launch {
+                getProductosUseCase().collect { productos ->
+                    _state.update { it.copy(isLoading = false, productos = productos) }
+                }
+            }
+            launch {
+                getCategoriasUseCase().collect { categorias ->
+                    _state.update { it.copy(categorias = categorias) }
+                }
             }
         }
+    }
+
+    fun onBusquedaChange(value: String) = _state.update { it.copy(busqueda = value) }
+
+    fun onCategoriaSelected(categoriaId: String) = _state.update {
+        it.copy(categoriaSeleccionada = categoriaId)
     }
 }
