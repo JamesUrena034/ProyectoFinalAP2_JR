@@ -9,5 +9,7 @@ data class EditCategoriaUiState(
     val isSaving: Boolean = false,
     val savedSuccessfully: Boolean = false,
     val error: String? = null,
-    val nombreError: String? = null
+    val nombreError: String? = null,
+    val descripcionError: String? = null,
+    val imagenError: String? = null
 )
