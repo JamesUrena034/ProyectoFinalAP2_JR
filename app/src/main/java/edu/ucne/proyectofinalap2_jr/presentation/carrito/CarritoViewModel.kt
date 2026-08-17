@@ -64,6 +64,9 @@ class CarritoViewModel @Inject constructor(
     fun onFechaFinChange(value: String) = _state.update {
         it.copy(fechaFin = value, fechaFinError = null)
     }
+    fun limpiarCarrito() {
+        _state.update { CarritoUiState() }
+    }
 
     fun realizarPedido() {
         val s = _state.value
