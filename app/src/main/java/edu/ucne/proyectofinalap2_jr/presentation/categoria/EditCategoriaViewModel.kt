@@ -4,12 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import edu.ucne.proyectofinalap2_jr.domain.model.Categoria
-import edu.ucne.proyectofinalap2_jr.domain.usecase.categoria.GetCategoriasUseCase
+import edu.ucne.proyectofinalap2_jr.domain.repository.CategoriaRepository
 import edu.ucne.proyectofinalap2_jr.domain.usecase.categoria.SaveCategoriaUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -17,7 +16,7 @@ import javax.inject.Inject
 @HiltViewModel
 class EditCategoriaViewModel @Inject constructor(
     private val saveCategoriaUseCase: SaveCategoriaUseCase,
-    private val getCategoriasUseCase: GetCategoriasUseCase
+    private val categoriaRepository: CategoriaRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(EditCategoriaUiState())
@@ -28,8 +27,7 @@ class EditCategoriaViewModel @Inject constructor(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
             try {
-                val categorias = getCategoriasUseCase().first()
-                val categoria = categorias.find { it.categoriaId == id }
+                val categoria = categoriaRepository.getCategoriaById(id)
                 categoria?.let { c ->
                     _state.update {
                         it.copy(
@@ -48,21 +46,31 @@ class EditCategoriaViewModel @Inject constructor(
     }
 
     fun onNombreChange(value: String) = _state.update {
-        it.copy(
-            nombre = value,
-            nombreError = if (value.isBlank()) "Nombre es requerido" else null
-        )
+        it.copy(nombre = value, nombreError = if (value.isBlank()) "Nombre es requerido" else null)
     }
 
-    fun onDescripcionChange(value: String) = _state.update { it.copy(descripcion = value) }
+    fun onDescripcionChange(value: String) = _state.update {
+        it.copy(descripcion = value, descripcionError = if (value.isBlank()) "Descripción es requerida" else null)
+    }
 
-    fun onImagenChange(value: String) = _state.update { it.copy(imagen = value) }
+    fun onImagenChange(value: String) = _state.update {
+        it.copy(imagen = value, imagenError = if (value.isBlank()) "URL de imagen es requerida" else null)
+    }
 
     fun save() {
         val s = _state.value
         val nombreError = if (s.nombre.isBlank()) "Nombre es requerido" else null
-        if (nombreError != null) {
-            _state.update { it.copy(nombreError = nombreError) }
+        val descripcionError = if (s.descripcion.isBlank()) "Descripción es requerida" else null
+        val imagenError = if (s.imagen.isBlank()) "URL de imagen es requerida" else null
+
+        if (nombreError != null || descripcionError != null || imagenError != null) {
+            _state.update {
+                it.copy(
+                    nombreError = nombreError,
+                    descripcionError = descripcionError,
+                    imagenError = imagenError
+                )
+            }
             return
         }
         viewModelScope.launch {
