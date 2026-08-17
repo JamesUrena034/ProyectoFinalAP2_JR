@@ -23,7 +23,8 @@ import edu.ucne.proyectofinalap2_jr.domain.model.CarritoItem
 @Composable
 fun CarritoScreen(
     viewModel: CarritoViewModel = hiltViewModel(),
-    onPedidoExitoso: () -> Unit
+    onPedidoExitoso: () -> Unit,
+    onContinuarAlPago: (CarritoUiState) -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -37,7 +38,7 @@ fun CarritoScreen(
         onCambiarCantidad = viewModel::cambiarCantidad,
         onFechaInicioChange = viewModel::onFechaInicioChange,
         onFechaFinChange = viewModel::onFechaFinChange,
-        onRealizarPedido = viewModel::realizarPedido
+        onContinuarAlPago = { onContinuarAlPago(state) }
     )
 }
 
@@ -49,7 +50,7 @@ fun CarritoBodyScreen(
     onCambiarCantidad: (String, Int) -> Unit,
     onFechaInicioChange: (String) -> Unit,
     onFechaFinChange: (String) -> Unit,
-    onRealizarPedido: () -> Unit
+    onContinuarAlPago: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -90,7 +91,6 @@ fun CarritoBodyScreen(
                     HorizontalDivider()
 
                     Column(modifier = Modifier.padding(16.dp)) {
-
                         OutlinedTextField(
                             value = state.fechaInicio,
                             onValueChange = onFechaInicioChange,
@@ -141,10 +141,10 @@ fun CarritoBodyScreen(
                         Spacer(Modifier.height(8.dp))
 
                         Button(
-                            onClick = onRealizarPedido,
+                            onClick = onContinuarAlPago,
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text("Realizar Pedido")
+                            Text("Continuar al Pago")
                         }
                     }
                 }
@@ -200,8 +200,10 @@ fun CarritoBodyScreenPreview() {
         CarritoBodyScreen(
             state = CarritoUiState(),
             onEliminarItem = {},
+            onCambiarCantidad = { _, _ -> },
             onFechaInicioChange = {},
             onFechaFinChange = {},
+            onContinuarAlPago = {}
             onRealizarPedido = {},
             onCambiarCantidad = { _, _ -> }
         )

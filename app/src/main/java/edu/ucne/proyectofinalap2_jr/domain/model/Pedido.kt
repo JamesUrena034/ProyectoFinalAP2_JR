@@ -8,7 +8,8 @@ data class Pedido(
     val estado: String = "pendiente",
     val fecha: String = "",
     val fechaInicio: String = "",
-    val fechaFin: String = ""
+    val fechaFin: String = "",
+    val metodoPago: String = ""
 )
 
 data class ItemPedido(
