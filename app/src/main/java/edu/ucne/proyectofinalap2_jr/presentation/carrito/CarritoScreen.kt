@@ -193,7 +193,6 @@ fun CarritoItemCard(
         }
     }
 }
-
 @Preview(showBackground = true)
 @Composable
 fun CarritoBodyScreenPreview() {
@@ -205,6 +204,8 @@ fun CarritoBodyScreenPreview() {
             onFechaInicioChange = {},
             onFechaFinChange = {},
             onContinuarAlPago = {}
+            onRealizarPedido = {},
+            onCambiarCantidad = { _, _ -> }
         )
     }
 }
