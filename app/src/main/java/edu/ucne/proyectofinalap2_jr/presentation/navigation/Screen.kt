@@ -23,4 +23,5 @@ sealed class Screen : NavKey {
         val categoriaId: String,
         val categoriaNombre: String
     ) : Screen()
+    @Serializable data object Checkout : Screen()
 }
