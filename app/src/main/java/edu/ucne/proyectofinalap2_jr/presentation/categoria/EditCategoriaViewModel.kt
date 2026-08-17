@@ -24,6 +24,7 @@ class EditCategoriaViewModel @Inject constructor(
 
     fun load(id: String) {
         if (id.isBlank()) return
+        _state.value = EditCategoriaUiState()
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
             try {
@@ -46,15 +47,24 @@ class EditCategoriaViewModel @Inject constructor(
     }
 
     fun onNombreChange(value: String) = _state.update {
-        it.copy(nombre = value, nombreError = if (value.isBlank()) "Nombre es requerido" else null)
+        it.copy(
+            nombre = value,
+            nombreError = if (value.isBlank()) "Nombre es requerido" else null
+        )
     }
 
     fun onDescripcionChange(value: String) = _state.update {
-        it.copy(descripcion = value, descripcionError = if (value.isBlank()) "Descripción es requerida" else null)
+        it.copy(
+            descripcion = value,
+            descripcionError = if (value.isBlank()) "Descripción es requerida" else null
+        )
     }
 
     fun onImagenChange(value: String) = _state.update {
-        it.copy(imagen = value, imagenError = if (value.isBlank()) "URL de imagen es requerida" else null)
+        it.copy(
+            imagen = value,
+            imagenError = if (value.isBlank()) "URL de imagen es requerida" else null
+        )
     }
 
     fun save() {
