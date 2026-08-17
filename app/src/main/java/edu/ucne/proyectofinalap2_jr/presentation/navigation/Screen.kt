@@ -19,6 +19,7 @@ sealed class Screen : NavKey {
     @Serializable data object AdminPedidos : Screen()
     @Serializable data object CreateCategoria : Screen()
     @Serializable data class EditCategoria(val categoriaId: String) : Screen()
+    @Serializable data class EditProducto(val productoId: String) : Screen()
     @Serializable data class ProductosPorCategoria(
         val categoriaId: String,
         val categoriaNombre: String

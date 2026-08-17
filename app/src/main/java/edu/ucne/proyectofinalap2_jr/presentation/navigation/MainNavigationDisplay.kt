@@ -31,7 +31,7 @@ import edu.ucne.proyectofinalap2_jr.presentation.producto.detail.ProductoDetailS
 import edu.ucne.proyectofinalap2_jr.presentation.producto.list.ProductoListScreen
 import edu.ucne.proyectofinalap2_jr.presentation.producto.list.ProductosPorCategoriaScreen
 import edu.ucne.proyectofinalap2_jr.presentation.carrito.CheckoutScreen
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import edu.ucne.proyectofinalap2_jr.presentation.producto.edit.EditProductoScreen
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.collectAsState
 
@@ -271,7 +271,7 @@ fun MainNavigationDisplay() {
                         ProductoListScreen(
                             onProductoClick = { id ->
                                 if (isAdmin) {
-                                    backStack.add(Screen.ProductoCreate(id))
+                                    backStack.add(Screen.EditProducto(id))
                                 } else {
                                     backStack.add(Screen.ProductoDetail(id))
                                 }
@@ -280,6 +280,15 @@ fun MainNavigationDisplay() {
                                 backStack.add(Screen.ProductoCreate())
                             },
                             isAdmin = isAdmin
+                        )
+                    }
+                    entry<Screen.EditProducto> { key ->
+                        EditProductoScreen(
+                            productoId = key.productoId,
+                            onBack = {
+                                if (backStack.isNotEmpty())
+                                    backStack.removeAt(backStack.size - 1)
+                            }
                         )
                     }
 
