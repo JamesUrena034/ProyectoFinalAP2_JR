@@ -6,6 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import edu.ucne.proyectofinalap2_jr.domain.model.ItemPedido
 import edu.ucne.proyectofinalap2_jr.domain.model.Pedido
 import edu.ucne.proyectofinalap2_jr.domain.repository.AuthRepository
+import edu.ucne.proyectofinalap2_jr.domain.repository.ProductoRepository
 import edu.ucne.proyectofinalap2_jr.domain.usecase.pedido.GetPedidosUseCase
 import edu.ucne.proyectofinalap2_jr.domain.usecase.pedido.SavePedidoUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,7 +23,8 @@ import javax.inject.Inject
 class CheckoutViewModel @Inject constructor(
     private val savePedidoUseCase: SavePedidoUseCase,
     private val getPedidosUseCase: GetPedidosUseCase,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val productoRepository: ProductoRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(CheckoutUiState())
@@ -80,6 +82,7 @@ class CheckoutViewModel @Inject constructor(
         }
 
         val user = authRepository.getCurrentUser() ?: return
+
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
             try {
@@ -132,7 +135,17 @@ class CheckoutViewModel @Inject constructor(
                     fechaFin = s.fechaFin,
                     metodoPago = s.metodoPago
                 )
+
                 savePedidoUseCase(pedido)
+
+                for (item in s.items) {
+                    val producto = productoRepository.getProductoById(item.productoId)
+                    producto?.let { p ->
+                        val nuevoStock = (p.stock - item.cantidad).coerceAtLeast(0)
+                        productoRepository.saveProducto(p.copy(stock = nuevoStock))
+                    }
+                }
+
                 _state.update { it.copy(isLoading = false, pedidoExitoso = true) }
             } catch (e: Exception) {
                 _state.update { it.copy(isLoading = false, error = e.message) }
