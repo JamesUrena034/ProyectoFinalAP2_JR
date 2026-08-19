@@ -20,6 +20,10 @@ class CreateCategoriaViewModel @Inject constructor(
     private val _state = MutableStateFlow(CreateCategoriaUiState())
     val state: StateFlow<CreateCategoriaUiState> = _state.asStateFlow()
 
+    fun resetState() {
+        _state.value = CreateCategoriaUiState()
+    }
+
     fun onNombreChange(value: String) = _state.update {
         it.copy(nombre = value, nombreError = if (value.isBlank()) "Nombre es requerido" else null)
     }
