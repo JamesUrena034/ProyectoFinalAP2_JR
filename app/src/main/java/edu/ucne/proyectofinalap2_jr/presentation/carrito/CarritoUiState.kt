@@ -10,7 +10,8 @@ data class CarritoUiState(
     val fechaInicio: String = "",
     val fechaFin: String = "",
     val fechaInicioError: String? = null,
-    val fechaFinError: String? = null
+    val fechaFinError: String? = null,
+    val fechasOcupadas: List<String> = emptyList()
 ) {
     val total: Double get() = items.sumOf { it.precio * it.cantidad }
 }
