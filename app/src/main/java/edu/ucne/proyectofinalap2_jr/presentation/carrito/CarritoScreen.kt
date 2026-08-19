@@ -5,6 +5,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.*
@@ -36,8 +37,8 @@ fun CarritoScreen(
         state = state,
         onEliminarItem = viewModel::eliminarItem,
         onCambiarCantidad = viewModel::cambiarCantidad,
-        onFechaInicioChange = viewModel::onFechaInicioChange,
-        onFechaFinChange = viewModel::onFechaFinChange,
+        onFechaInicioSelected = viewModel::onFechaInicioSelected,
+        onFechaFinSelected = viewModel::onFechaFinSelected,
         onContinuarAlPago = { onContinuarAlPago(state) }
     )
 }
@@ -48,10 +49,62 @@ fun CarritoBodyScreen(
     state: CarritoUiState,
     onEliminarItem: (String) -> Unit,
     onCambiarCantidad: (String, Int) -> Unit,
-    onFechaInicioChange: (String) -> Unit,
-    onFechaFinChange: (String) -> Unit,
+    onFechaInicioSelected: (Long) -> Unit,
+    onFechaFinSelected: (Long) -> Unit,
     onContinuarAlPago: () -> Unit
 ) {
+    var showDatePickerInicio by remember { mutableStateOf(false) }
+    var showDatePickerFin by remember { mutableStateOf(false) }
+
+    val datePickerStateInicio = rememberDatePickerState(
+        initialSelectedDateMillis = System.currentTimeMillis()
+    )
+    val datePickerStateFin = rememberDatePickerState(
+        initialSelectedDateMillis = System.currentTimeMillis()
+    )
+
+    if (showDatePickerInicio) {
+        DatePickerDialog(
+            onDismissRequest = { showDatePickerInicio = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    datePickerStateInicio.selectedDateMillis?.let {
+                        onFechaInicioSelected(it)
+                    }
+                    showDatePickerInicio = false
+                }) { Text("Aceptar") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePickerInicio = false }) {
+                    Text("Cancelar")
+                }
+            }
+        ) {
+            DatePicker(state = datePickerStateInicio)
+        }
+    }
+
+    if (showDatePickerFin) {
+        DatePickerDialog(
+            onDismissRequest = { showDatePickerFin = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    datePickerStateFin.selectedDateMillis?.let {
+                        onFechaFinSelected(it)
+                    }
+                    showDatePickerFin = false
+                }) { Text("Aceptar") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePickerFin = false }) {
+                    Text("Cancelar")
+                }
+            }
+        ) {
+            DatePicker(state = datePickerStateFin)
+        }
+    }
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(title = { Text("Mi Carrito") })
@@ -91,12 +144,20 @@ fun CarritoBodyScreen(
                     HorizontalDivider()
 
                     Column(modifier = Modifier.padding(16.dp)) {
+
                         OutlinedTextField(
                             value = state.fechaInicio,
-                            onValueChange = onFechaInicioChange,
-                            label = { Text("Fecha de inicio (dd/MM/yyyy)") },
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Fecha de inicio") },
                             isError = state.fechaInicioError != null,
-                            modifier = Modifier.fillMaxWidth()
+                            trailingIcon = {
+                                IconButton(onClick = { showDatePickerInicio = true }) {
+                                    Icon(Icons.Default.CalendarMonth, contentDescription = "Seleccionar fecha")
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            placeholder = { Text("Seleccionar fecha") }
                         )
                         state.fechaInicioError?.let {
                             Text(it, color = Color.Red, style = MaterialTheme.typography.bodySmall)
@@ -106,13 +167,46 @@ fun CarritoBodyScreen(
 
                         OutlinedTextField(
                             value = state.fechaFin,
-                            onValueChange = onFechaFinChange,
-                            label = { Text("Fecha de fin (dd/MM/yyyy)") },
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Fecha de fin") },
                             isError = state.fechaFinError != null,
-                            modifier = Modifier.fillMaxWidth()
+                            trailingIcon = {
+                                IconButton(onClick = { showDatePickerFin = true }) {
+                                    Icon(Icons.Default.CalendarMonth, contentDescription = "Seleccionar fecha")
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            placeholder = { Text("Seleccionar fecha") }
                         )
                         state.fechaFinError?.let {
                             Text(it, color = Color.Red, style = MaterialTheme.typography.bodySmall)
+                        }
+
+                        if (state.fechasOcupadas.isNotEmpty()) {
+                            Spacer(Modifier.height(8.dp))
+                            ElevatedCard(
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = CardDefaults.elevatedCardColors(
+                                    containerColor = MaterialTheme.colorScheme.errorContainer
+                                )
+                            ) {
+                                Column(modifier = Modifier.padding(12.dp)) {
+                                    Text(
+                                        "⚠️ No disponible en esas fechas:",
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onErrorContainer,
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
+                                    state.fechasOcupadas.forEach { nombre ->
+                                        Text(
+                                            "• $nombre ya está reservado en esas fechas",
+                                            color = MaterialTheme.colorScheme.onErrorContainer,
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
+                                    }
+                                }
+                            }
                         }
 
                         Spacer(Modifier.height(8.dp))
@@ -142,6 +236,9 @@ fun CarritoBodyScreen(
 
                         Button(
                             onClick = onContinuarAlPago,
+                            enabled = state.fechasOcupadas.isEmpty() &&
+                                    state.fechaInicio.isNotBlank() &&
+                                    state.fechaFin.isNotBlank(),
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text("Continuar al Pago")
@@ -202,8 +299,8 @@ fun CarritoBodyScreenPreview() {
             state = CarritoUiState(),
             onEliminarItem = {},
             onCambiarCantidad = { _, _ -> },
-            onFechaInicioChange = {},
-            onFechaFinChange = {},
+            onFechaInicioSelected = {},
+            onFechaFinSelected = {},
             onContinuarAlPago = {}
         )
     }

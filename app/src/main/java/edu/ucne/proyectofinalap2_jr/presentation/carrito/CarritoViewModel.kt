@@ -7,7 +7,6 @@ import edu.ucne.proyectofinalap2_jr.domain.model.CarritoItem
 import edu.ucne.proyectofinalap2_jr.domain.model.ItemPedido
 import edu.ucne.proyectofinalap2_jr.domain.model.Pedido
 import edu.ucne.proyectofinalap2_jr.domain.repository.AuthRepository
-import edu.ucne.proyectofinalap2_jr.domain.repository.PedidoRepository
 import edu.ucne.proyectofinalap2_jr.domain.usecase.pedido.GetPedidosUseCase
 import edu.ucne.proyectofinalap2_jr.domain.usecase.pedido.SavePedidoUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,6 +39,11 @@ class CarritoViewModel @Inject constructor(
         }
         _state.update { it.copy(items = items) }
     }
+
+    fun eliminarItem(productoId: String) {
+        _state.update { it.copy(items = it.items.filter { i -> i.productoId != productoId }) }
+    }
+
     fun cambiarCantidad(productoId: String, cantidad: Int) {
         if (cantidad <= 0) {
             eliminarItem(productoId)
@@ -53,63 +57,28 @@ class CarritoViewModel @Inject constructor(
         }
     }
 
-    fun eliminarItem(productoId: String) {
-        _state.update { it.copy(items = it.items.filter { i -> i.productoId != productoId }) }
-    }
-
-    fun onFechaInicioChange(value: String) = _state.update {
-        it.copy(fechaInicio = value, fechaInicioError = null)
-    }
-
-    fun onFechaFinChange(value: String) = _state.update {
-        it.copy(fechaFin = value, fechaFinError = null)
-    }
-    fun limpiarCarrito() {
-        _state.update { CarritoUiState() }
-    }
-
-    fun realizarPedido() {
-        val s = _state.value
-
-        val fechaInicioError = if (s.fechaInicio.isBlank()) "La fecha de inicio es requerida" else null
-        val fechaFinError = if (s.fechaFin.isBlank()) "La fecha de fin es requerida" else null
-
-        if (fechaInicioError != null || fechaFinError != null) {
-            _state.update {
-                it.copy(
-                    fechaInicioError = fechaInicioError,
-                    fechaFinError = fechaFinError
-                )
-            }
-            return
-        }
-
+    fun onFechaInicioSelected(millis: Long) {
         val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-        val inicio = try { formatter.parse(s.fechaInicio) } catch (e: Exception) { null }
-        val fin = try { formatter.parse(s.fechaFin) } catch (e: Exception) { null }
+        val fecha = formatter.format(Date(millis))
+        _state.update { it.copy(fechaInicio = fecha, fechaInicioError = null, fechasOcupadas = emptyList()) }
+        verificarDisponibilidad()
+    }
 
-        if (inicio == null) {
-            _state.update { it.copy(fechaInicioError = "Formato inválido (dd/MM/yyyy)") }
-            return
-        }
-        if (fin == null) {
-            _state.update { it.copy(fechaFinError = "Formato inválido (dd/MM/yyyy)") }
-            return
-        }
-        if (fin.before(inicio)) {
-            _state.update { it.copy(fechaFinError = "La fecha de fin no puede ser antes de la fecha de inicio") }
-            return
-        }
-        if (inicio.before(Date())) {
-            _state.update { it.copy(fechaInicioError = "La fecha de inicio no puede ser en el pasado") }
-            return
-        }
+    fun onFechaFinSelected(millis: Long) {
+        val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        val fecha = formatter.format(Date(millis))
+        _state.update { it.copy(fechaFin = fecha, fechaFinError = null, fechasOcupadas = emptyList()) }
+        verificarDisponibilidad()
+    }
 
-        val user = authRepository.getCurrentUser() ?: return
-
+    private fun verificarDisponibilidad() {
+        val s = _state.value
+        if (s.fechaInicio.isBlank() || s.fechaFin.isBlank()) return
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true) }
             try {
+                val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                val inicio = formatter.parse(s.fechaInicio) ?: return@launch
+                val fin = formatter.parse(s.fechaFin) ?: return@launch
                 val pedidosExistentes = getPedidosUseCase().first()
                 val productosOcupados = mutableListOf<String>()
 
@@ -127,47 +96,14 @@ class CarritoViewModel @Inject constructor(
                     }
                     if (ocupado) productosOcupados.add(item.nombre)
                 }
-
-                if (productosOcupados.isNotEmpty()) {
-                    _state.update {
-                        it.copy(
-                            isLoading = false,
-                            error = "Los siguientes productos no están disponibles en esas fechas: ${productosOcupados.joinToString(", ")}"
-                        )
-                    }
-                    return@launch
-                }
-
-                val pedido = Pedido(
-                    usuarioId = user.uid,
-                    productos = s.items.map {
-                        ItemPedido(
-                            productoId = it.productoId,
-                            nombre = it.nombre,
-                            precio = it.precio,
-                            cantidad = it.cantidad,
-                            imagen = it.imagen
-                        )
-                    },
-                    total = s.total,
-                    estado = "pendiente",
-                    fecha = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date()),
-                    fechaInicio = s.fechaInicio,
-                    fechaFin = s.fechaFin
-                )
-                savePedidoUseCase(pedido)
-                _state.update {
-                    it.copy(
-                        isLoading = false,
-                        items = emptyList(),
-                        pedidoExitoso = true,
-                        fechaInicio = "",
-                        fechaFin = ""
-                    )
-                }
+                _state.update { it.copy(fechasOcupadas = productosOcupados) }
             } catch (e: Exception) {
-                _state.update { it.copy(isLoading = false, error = e.message) }
+                e.printStackTrace()
             }
         }
+    }
+
+    fun limpiarCarrito() {
+        _state.update { CarritoUiState() }
     }
 }
