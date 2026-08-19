@@ -60,6 +60,7 @@ https://youtu.be/RUdv7Gp_avg
 
 ## Desarrollado por
 
-**Ronnel De La Cruz** y **James Ureña**
+1-**Ronnel De La Cruz** 
+2-**James Ureña**
 
 Estudiantes de Ingeniería de Sistemas — UCNE 🇩🇴
