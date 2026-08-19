@@ -25,6 +25,10 @@ fun CreateCategoriaScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
+    LaunchedEffect(Unit) {
+        viewModel.resetState()
+    }
+
     LaunchedEffect(state.savedSuccessfully) {
         if (state.savedSuccessfully) onBack()
     }
